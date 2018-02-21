@@ -5,7 +5,6 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.AppCompatImageView;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
 
 /**
@@ -14,8 +13,8 @@ import android.widget.TextView;
 
 public class ProfileActivity extends AppCompatActivity {
 
-    public static String EMAIL_KEY = "EMAIL_KEY";
-    public static String PASSWORD_KEY = "PASSWORD_KEY";
+    public static String USER_KEY = "USER_KEY";
+
 
     private AppCompatImageView mPhoto;
     private TextView mLogin;
@@ -38,8 +37,10 @@ public class ProfileActivity extends AppCompatActivity {
         mPassword = findViewById(R.id.tvPassword);
 
         Bundle bundle = getIntent().getExtras();
-        mLogin.setText(bundle.getString(EMAIL_KEY));
-        mPassword.setText(bundle.getString(PASSWORD_KEY));
+        User user = (User) bundle.get(USER_KEY);
+
+        mLogin.setText(user.getmLogin());
+        mPassword.setText(user.getmPassword());
 
         mPhoto.setOnClickListener(mOnPhotoClickListener);
     }

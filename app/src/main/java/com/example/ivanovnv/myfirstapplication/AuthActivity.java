@@ -1,7 +1,6 @@
 package com.example.ivanovnv.myfirstapplication;
 
 import android.content.Intent;
-import android.content.SharedPreferences;
 import android.support.annotation.StringRes;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
@@ -11,8 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
-
-import java.util.regex.Pattern;
 
 public class AuthActivity extends AppCompatActivity {
 
@@ -27,8 +24,9 @@ public class AuthActivity extends AppCompatActivity {
             if(isEmailValid() && isPasswordValid()) {
                 Intent startProfileIntent =
                         new Intent(AuthActivity.this,ProfileActivity.class);
-                startProfileIntent.putExtra(ProfileActivity.EMAIL_KEY,mLogin.getText().toString());
-                startProfileIntent.putExtra(ProfileActivity.PASSWORD_KEY,mPassword.getText().toString());
+                startProfileIntent.putExtra(ProfileActivity.USER_KEY,
+                        new User(mLogin.getText().toString(),mPassword.getText().toString()));
+
                 startActivity(startProfileIntent);
 
             } else

@@ -16,7 +16,7 @@ public abstract class SingleFragmentActivity extends AppCompatActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_single_fragment);
 
-        if(savedInstanceState!=null){
+        if(savedInstanceState==null){
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.fragment_container,getFragment())

@@ -11,4 +11,5 @@
     <string name="reg_password_again">Введите пароль еще раз</string>
     <string name="login_register_success">Пользователь успешно добавлен</string>
     <string name="login_register_error">Имя пользователя уже занято</string>
+    <string name="login_error">Ошибка ввода логина или пароля</string>
 </resources>

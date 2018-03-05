@@ -10,18 +10,21 @@ import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.ArrayAdapter;
+import android.widget.AutoCompleteTextView;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 public class AuthFragment extends Fragment {
 
-    private EditText mLogin;
+    private AutoCompleteTextView mLogin;
     private EditText mPassword;
     private Button mEnter;
     private Button mRegister;
     private SharedPreferencesHelper mSharedPreferencesHelper;
 
+    private ArrayAdapter<String> mLoginedUsersAdapter;
 
     public static AuthFragment newInstance() {
         
@@ -35,30 +38,25 @@ public class AuthFragment extends Fragment {
     private View.OnClickListener mOnEnterClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
-            boolean isLoginSuccess = false;
+            if(isEmailValid() && isPasswordValid()) {
+               User user = mSharedPreferencesHelper.login(
+                       mLogin.getText().toString(),
+                       mPassword.getText().toString());
+                if(user != null) {
+                    Intent startProfileIntent =
+                            new Intent(getActivity(),ProfileActivity.class);
+                    startProfileIntent.putExtra(ProfileActivity.USER_KEY,user);
 
-            for(User user : mSharedPreferencesHelper.getUsers()){
-                if(user.getmLogin().equalsIgnoreCase(mLogin.getText().toString()) &&
-                        user.getmPassword().equals(mPassword.getText().toString())){
-                    isLoginSuccess = true;
-                    if(isEmailValid() && isPasswordValid()) {
-                        Intent startProfileIntent =
-                                new Intent(getActivity(),ProfileActivity.class);
-                        startProfileIntent.putExtra(ProfileActivity.USER_KEY,
-                                new User(mLogin.getText().toString(),mPassword.getText().toString()));
+                    startActivity(startProfileIntent);
+                    getActivity().finish();
 
-                        startActivity(startProfileIntent);
-                        break;
-                    } else
-                    {
-                        showMessage(R.string.login_input_error);
-                    }
                 }
-
+                else {
+                    showMessage(R.string.login_error);
+                }
             }
-
-            if(!isLoginSuccess) {
-                showMessage(R.string.login_error);
+            else {
+                showMessage(R.string.login_input_error);
             }
 
 
@@ -74,6 +72,15 @@ public class AuthFragment extends Fragment {
                    .addToBackStack(RegistrationFragment.class.getName())
                    .commit();
 
+        }
+    };
+
+    private View.OnFocusChangeListener mOnLoginFocusListener = new View.OnFocusChangeListener() {
+        @Override
+        public void onFocusChange(View v, boolean hasFocus) {
+            if(hasFocus) {
+               // mLogin.showDropDown();
+            }
         }
     };
 
@@ -105,8 +112,36 @@ public class AuthFragment extends Fragment {
 
         mEnter.setOnClickListener(mOnEnterClickListener);
         mRegister.setOnClickListener(mOnRegisterClickListener);
+        mLogin.setOnFocusChangeListener(mOnLoginFocusListener);
 
+        mLoginedUsersAdapter = new ArrayAdapter<>(
+                getActivity(),
+                R.layout.support_simple_spinner_dropdown_item,
+                mSharedPreferencesHelper.getSuccessLogins());
+
+        mLogin.setAdapter(mLoginedUsersAdapter);
 
         return v;
+    }
+/*
+    @Override
+    public void onResume() {
+
+        super.onResume();
+    }
+    */
+/*
+    @Override
+    public void onPause() {
+        mEnter.setOnClickListener(null);
+        mRegister.setOnClickListener(null);
+        mLogin.setOnFocusChangeListener(null);
+        super.onPause();
+    }
+*/
+    @Override
+    public void onDestroy() {
+        mLoginedUsersAdapter = null;
+        super.onDestroy();
     }
 }

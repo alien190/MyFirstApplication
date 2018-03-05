@@ -9,6 +9,7 @@ import java.io.Serializable;
 public class User implements Serializable {
     private String mLogin;
     private String mPassword;
+    private boolean mHasSuccessLogin;
 
     public User(String mLogin, String mPassword) {
         this.mLogin = mLogin;
@@ -23,12 +24,18 @@ public class User implements Serializable {
         return mPassword;
     }
 
+    public boolean getmHasSuccessLogin() {return mHasSuccessLogin;}
+
     public void setmLogin(String mLogin) {
         this.mLogin = mLogin;
     }
 
     public void setmPassword(String mPassword) {
         this.mPassword = mPassword;
+    }
+
+    public void setmHasSuccessLogin(boolean mHasSuccessLogin) {
+        this.mHasSuccessLogin = mHasSuccessLogin;
     }
 
 

@@ -3,13 +3,16 @@ package com.example.ivanovnv.myfirstapplication;
 import android.content.Context;
 import android.content.SharedPreferences;
 
+
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
+
 import java.util.List;
+
 
 /**
  * Created by IvanovNV on 21.02.2018.
@@ -45,4 +48,30 @@ public class SharedPreferencesHelper {
         mSharedPreferences.edit().putString(USERS_KEY,mGson.toJson(users,USRS_TYPE)).apply();
         return true;
     }
+
+    public User login(String login,String password){
+        List<User> users = getUsers();
+        for(User u : users) {
+            if(login.equalsIgnoreCase(u.getmLogin())
+                    && password.equals(u.getmPassword())) {
+                u.setmHasSuccessLogin(true);
+                mSharedPreferences.edit().putString(USERS_KEY,mGson.toJson(users,USRS_TYPE)).apply();
+                return u;
+            }
+        }
+        return null;
+    }
+
+   public List<String> getSuccessLogins() {
+        List<String> successLogins = new ArrayList<>();
+        List<User> allUsers = getUsers();
+
+        for(User u : allUsers) {
+            if(u.getmHasSuccessLogin()) {
+                successLogins.add(u.getmLogin());
+            }
+        }
+
+    return successLogins;
+   }
 }

@@ -15,4 +15,5 @@
     <string name="logout">Выход</string>
     <string name="request_error">Ошибка запроса регистрации</string>
     <string name="auth_error">Ошибка аутентификации</string>
+    <string name="name">Имя</string>
 </resources>

@@ -20,58 +20,26 @@ import android.widget.TextView;
 public class ProfileActivity extends AppCompatActivity {
 
     public static String USER_KEY = "USER_KEY";
-    public static int REQUEST_CODE_GET_PHOTO = 101;
+
+    private TextView mEmail;
+    private TextView mName;
 
 
-    private AppCompatImageView mPhoto;
-    private TextView mLogin;
-    private TextView mPassword;
-
-    private View.OnClickListener mOnPhotoClickListener = new View.OnClickListener() {
-        @Override
-        public void onClick(View v) {
-            openGalary();
-        }
-    };
-
-    private void openGalary(){
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(intent, REQUEST_CODE_GET_PHOTO);
-
-
-    }
-
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        if (requestCode == REQUEST_CODE_GET_PHOTO &&
-                resultCode == Activity.RESULT_OK &&
-                data != null) {
-            Uri photoUri = data.getData();
-            mPhoto.setImageURI(photoUri);
-        }
-        else {
-            super.onActivityResult(requestCode, resultCode, data);
-        }
-    }
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.ac_profile);
 
-        mPhoto = findViewById(R.id.ivPhoto);
-        mLogin = findViewById(R.id.tvEmail);
-        mPassword = findViewById(R.id.tvPassword);
+        mEmail = findViewById(R.id.tvEmail);
+        mName = findViewById(R.id.tvName);
 
         Bundle bundle = getIntent().getExtras();
         User user = (User) bundle.get(USER_KEY);
 
-        mLogin.setText(user.getEmail());
-        mPassword.setText(user.getPassword());
+        mEmail.setText(user.getEmail());
+        mName.setText(user.getName());
 
-        mPhoto.setOnClickListener(mOnPhotoClickListener);
     }
 
     @Override

@@ -4,6 +4,7 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 
+import com.example.ivanovnv.myfirstapplication.model.User;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 

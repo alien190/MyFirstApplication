@@ -2,7 +2,6 @@ package com.example.ivanovnv.myfirstapplication;
 
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.Looper;
 import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
@@ -15,10 +14,10 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.ivanovnv.myfirstapplication.model.User;
 import com.google.gson.Gson;
 
 import java.io.IOException;
-import java.util.regex.Pattern;
 
 import okhttp3.Call;
 import okhttp3.Callback;

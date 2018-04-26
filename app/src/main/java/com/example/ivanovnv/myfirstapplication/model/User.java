@@ -1,4 +1,4 @@
-package com.example.ivanovnv.myfirstapplication;
+package com.example.ivanovnv.myfirstapplication.model;
 
 import com.google.gson.annotations.SerializedName;
 

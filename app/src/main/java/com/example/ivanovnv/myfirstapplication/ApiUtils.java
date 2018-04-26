@@ -21,6 +21,7 @@ public class ApiUtils {
     private static OkHttpClient okHttpClient;
     private static Retrofit retrofit;
     private static Gson gson;
+    private static AcademyApi api;
 
     public static OkHttpClient getBasicAuthClient(final String email, final String password, boolean newInstance) {
         if (newInstance || okHttpClient == null) {
@@ -55,5 +56,12 @@ public class ApiUtils {
                     .build();
         }
         return retrofit;
+    }
+
+    public static AcademyApi getApi() {
+        if (api == null) {
+            api = getRetrofit().create(AcademyApi.class);
+        }
+        return api;
     }
 }

@@ -1,5 +1,7 @@
 package com.example.ivanovnv.myfirstapplication;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.io.Serializable;
 
 /**
@@ -7,34 +9,39 @@ import java.io.Serializable;
  */
 
 public class User implements Serializable {
-    private String mLogin;
+    @SerializedName("email")
+    private String mEmail;
+    @SerializedName("password")
     private String mPassword;
+    @SerializedName("name")
+    private String mName;
     private boolean mHasSuccessLogin;
 
-    public User(String mLogin, String mPassword) {
-        this.mLogin = mLogin;
+    public User(String mEmail, String mName, String mPassword) {
+        this.mEmail = mEmail;
         this.mPassword = mPassword;
+        this.mName = mName;
     }
 
-    public String getmLogin() {
-        return mLogin;
+    public String getEmail() {
+        return mEmail;
     }
 
-    public String getmPassword() {
+    public String getPassword() {
         return mPassword;
     }
 
-    public boolean getmHasSuccessLogin() {return mHasSuccessLogin;}
+    public boolean getHasSuccessLogin() {return mHasSuccessLogin;}
 
-    public void setmLogin(String mLogin) {
-        this.mLogin = mLogin;
+    public void setEmail(String mEmail) {
+        this.mEmail = mEmail;
     }
 
-    public void setmPassword(String mPassword) {
+    public void setPassword(String mPassword) {
         this.mPassword = mPassword;
     }
 
-    public void setmHasSuccessLogin(boolean mHasSuccessLogin) {
+    public void setHasSuccessLogin(boolean mHasSuccessLogin) {
         this.mHasSuccessLogin = mHasSuccessLogin;
     }
 

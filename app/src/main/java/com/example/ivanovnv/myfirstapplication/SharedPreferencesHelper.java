@@ -39,7 +39,7 @@ public class SharedPreferencesHelper {
     public boolean addUser(User user){
         List<User> users = getUsers();
         for(User u:users) {
-            if (u.getmLogin().equalsIgnoreCase(user.getmLogin())) {
+            if (u.getEmail().equalsIgnoreCase(user.getEmail())) {
                 return false;
             }
         }
@@ -52,9 +52,9 @@ public class SharedPreferencesHelper {
     public User login(String login,String password){
         List<User> users = getUsers();
         for(User u : users) {
-            if(login.equalsIgnoreCase(u.getmLogin())
-                    && password.equals(u.getmPassword())) {
-                u.setmHasSuccessLogin(true);
+            if(login.equalsIgnoreCase(u.getEmail())
+                    && password.equals(u.getPassword())) {
+                u.setHasSuccessLogin(true);
                 mSharedPreferences.edit().putString(USERS_KEY,mGson.toJson(users,USRS_TYPE)).apply();
                 return u;
             }
@@ -67,8 +67,8 @@ public class SharedPreferencesHelper {
         List<User> allUsers = getUsers();
 
         for(User u : allUsers) {
-            if(u.getmHasSuccessLogin()) {
-                successLogins.add(u.getmLogin());
+            if(u.getHasSuccessLogin()) {
+                successLogins.add(u.getEmail());
             }
         }
 

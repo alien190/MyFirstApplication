@@ -41,57 +41,54 @@ public class RegistrationFragment extends Fragment {
     private Button mRegistration;
     private SharedPreferencesHelper mSharedPreferencesHelper;
 
-    public static RegistrationFragment newInstance () {return new RegistrationFragment();}
+    public static RegistrationFragment newInstance() {
+        return new RegistrationFragment();
+    }
 
     private View.OnClickListener mOnRegistrationClickListener = new View.OnClickListener() {
         @Override
         public void onClick(View v) {
 
-            if(isInputValid()) {
+            if (isInputValid()) {
 
                 User user = new User(
                         mLogin.getText().toString(),
                         mName.getText().toString(),
                         mPassword.getText().toString());
 
-                Request request = new Request.Builder()
-                        .url(BuildConfig.SERVER_URL.concat("registration/"))
-                        .post(RequestBody.create(JSON, new Gson().toJson(user)))
-                        .build();
 
-                OkHttpClient client = new OkHttpClient();
-                client.newCall(request).enqueue(new Callback() {
+                ApiUtils.getApi().registration(user).enqueue(
+                        new retrofit2.Callback<Void>() {
+                            Handler handler = new Handler(getActivity().getMainLooper());
 
-                    Handler handler = new Handler(getActivity().getMainLooper());
-
-                    @Override
-                    public void onFailure(Call call, IOException e) {
-                        handler.post(new Runnable() {
                             @Override
-                            public void run() {
-                                showMessage(R.string.request_error);
+                            public void onResponse(retrofit2.Call<Void> call, final retrofit2.Response<Void> response) {
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        if (response.isSuccessful()) {
+                                            showMessage(R.string.login_register_success);
+                                            getFragmentManager().popBackStack();
+                                        } else {
+                                            //todo детеальная обработка ошибок
+                                            showMessage(R.string.login_register_error);
+                                        }
+                                    }
+                                });
+                            }
+
+                            @Override
+                            public void onFailure(retrofit2.Call<Void> call, Throwable t) {
+                                handler.post(new Runnable() {
+                                    @Override
+                                    public void run() {
+                                        showMessage(R.string.request_error);
+                                    }
+                                });
                             }
                         });
-                    }
 
-                    @Override
-                    public void onResponse(Call call, final Response response) throws IOException {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                if (response.isSuccessful()) {
-                                    showMessage(R.string.login_register_success);
-                                    getFragmentManager().popBackStack();
-                                } else {
-                                    //todo детеальная обработка ошибок
-                                    showMessage(R.string.login_register_error);
-                                }
-                            }
-                        });
-                    }
-                });
-            }
-            else {
+            } else {
                 showMessage(R.string.login_input_error);
             }
         }
@@ -100,7 +97,7 @@ public class RegistrationFragment extends Fragment {
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.fr_registration,container,false);
+        View view = inflater.inflate(R.layout.fr_registration, container, false);
 
         mSharedPreferencesHelper = new SharedPreferencesHelper(getActivity());
 
@@ -115,26 +112,26 @@ public class RegistrationFragment extends Fragment {
         return view;
     }
 
-    private boolean isInputValid(){
+    private boolean isInputValid() {
         String email = mLogin.getText().toString();
-        if(isEmailValid(email) && isPasswordValid()){
+        if (isEmailValid(email) && isPasswordValid()) {
             return true;
         }
         return false;
     }
 
-    private boolean isEmailValid (String email){
+    private boolean isEmailValid(String email) {
         return !TextUtils.isEmpty(email) && Patterns.EMAIL_ADDRESS.matcher(email).matches();
     }
 
-    private boolean isPasswordValid (){
+    private boolean isPasswordValid() {
         String password = mPassword.getText().toString();
         String passwordAgain = mPasswordAgain.getText().toString();
 
         return password.equals(passwordAgain) && !TextUtils.isEmpty(password);
     }
 
-    private void showMessage (@StringRes int string) {
-        Toast.makeText(getActivity(), string,Toast.LENGTH_SHORT).show();
+    private void showMessage(@StringRes int string) {
+        Toast.makeText(getActivity(), string, Toast.LENGTH_SHORT).show();
     }
 }

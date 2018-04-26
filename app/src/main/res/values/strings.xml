@@ -14,4 +14,5 @@
     <string name="login_error">Ошибка ввода логина или пароля</string>
     <string name="logout">Выход</string>
     <string name="request_error">Ошибка запроса регистрации</string>
+    <string name="auth_error">Ошибка аутентификации</string>
 </resources>

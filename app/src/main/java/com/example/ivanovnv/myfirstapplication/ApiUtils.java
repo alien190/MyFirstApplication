@@ -19,7 +19,7 @@ public class ApiUtils {
 
     public static OkHttpClient getBasicAuthClient(final String email, final String password, boolean newInstance) {
         if (newInstance || okHttpClient == null) {
-            OkHttpClient.Builder builder = new OkHttpClient().Builder();
+            OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
             builder.authenticator(new Authenticator() {
                 @Nullable

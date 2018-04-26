@@ -55,7 +55,7 @@ public class RegistrationFragment extends Fragment {
                         mName.getText().toString(),
                         mPassword.getText().toString());
 
-                final Request request = new Request.Builder()
+                Request request = new Request.Builder()
                         .url(BuildConfig.SERVER_URL.concat("registration/"))
                         .post(RequestBody.create(JSON, new Gson().toJson(user)))
                         .build();

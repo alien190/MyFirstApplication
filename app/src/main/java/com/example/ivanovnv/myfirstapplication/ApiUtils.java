@@ -25,6 +25,8 @@ public class ApiUtils {
 
     public static OkHttpClient getBasicAuthClient(final String email, final String password, boolean newInstance) {
         if (newInstance || okHttpClient == null) {
+
+            okHttpClient = null;
             OkHttpClient.Builder builder = new OkHttpClient.Builder();
 
             builder.authenticator(new Authenticator() {
@@ -43,15 +45,15 @@ public class ApiUtils {
         return okHttpClient;
     }
 
-    public static Retrofit getRetrofit(){
+    public static Retrofit getRetrofit(final String email, final String password, boolean newInstance){
         if (gson == null)  {
             gson = new Gson();
         }
-        if (retrofit == null) {
+        if (retrofit == null || newInstance) {
             retrofit = new Retrofit.Builder()
                     .baseUrl(BuildConfig.SERVER_URL)
                     //need for interceptors
-                    .client(getBasicAuthClient("", "", false))
+                    .client(getBasicAuthClient(email, password, newInstance))
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .build();
         }
@@ -60,8 +62,13 @@ public class ApiUtils {
 
     public static AcademyApi getApi() {
         if (api == null) {
-            api = getRetrofit().create(AcademyApi.class);
+            api = getRetrofit("", "", false).create(AcademyApi.class);
         }
+        return api;
+    }
+
+    public static AcademyApi getApi(final String email, final String password) {
+        api = getRetrofit(email, password, true).create(AcademyApi.class);
         return api;
     }
 }

@@ -14,18 +14,9 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
-import com.example.ivanovnv.myfirstapplication.model.User;
-import com.google.gson.Gson;
+import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
 import okhttp3.MediaType;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 /**
  * Created by IvanovNV on 21.02.2018.
@@ -39,7 +30,6 @@ public class RegistrationFragment extends Fragment {
     private EditText mPasswordAgain;
     private EditText mName;
     private Button mRegistration;
-    private SharedPreferencesHelper mSharedPreferencesHelper;
 
     public static RegistrationFragment newInstance() {
         return new RegistrationFragment();
@@ -51,13 +41,13 @@ public class RegistrationFragment extends Fragment {
 
             if (isInputValid()) {
 
-                User user = new User(
+                UserForRegistration userForRegistration = new UserForRegistration(
                         mLogin.getText().toString(),
                         mName.getText().toString(),
                         mPassword.getText().toString());
 
 
-                ApiUtils.getApi().registration(user).enqueue(
+                ApiUtils.getApi().registration(userForRegistration).enqueue(
                         new retrofit2.Callback<Void>() {
                             Handler handler = new Handler(getActivity().getMainLooper());
 
@@ -98,8 +88,6 @@ public class RegistrationFragment extends Fragment {
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fr_registration, container, false);
-
-        mSharedPreferencesHelper = new SharedPreferencesHelper(getActivity());
 
         mLogin = view.findViewById(R.id.etRegEmail);
         mPassword = view.findViewById(R.id.etRegPassword);

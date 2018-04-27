@@ -5,6 +5,7 @@ import com.example.ivanovnv.myfirstapplication.model.Albums;
 import com.example.ivanovnv.myfirstapplication.model.Song;
 import com.example.ivanovnv.myfirstapplication.model.Songs;
 import com.example.ivanovnv.myfirstapplication.model.User;
+import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
 import retrofit2.Call;
 import retrofit2.http.Body;
@@ -15,7 +16,10 @@ import retrofit2.http.Path;
 public interface AcademyApi {
 
     @POST("registration")
-    Call<Void> registration(@Body User user);
+    Call<Void> registration(@Body UserForRegistration userForRegistration);
+
+    @GET("user")
+    Call<User> getUser();
 
     @GET("albums")
     Call<Albums> getAlbums();

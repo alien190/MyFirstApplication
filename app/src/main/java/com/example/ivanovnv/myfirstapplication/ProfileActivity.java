@@ -10,6 +10,7 @@ import android.view.MenuItem;
 import android.widget.TextView;
 
 import com.example.ivanovnv.myfirstapplication.model.User;
+import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
 /**
  * Created by IvanovNV on 21.02.2018.
@@ -33,10 +34,10 @@ public class ProfileActivity extends AppCompatActivity {
         mName = findViewById(R.id.tvName);
 
         Bundle bundle = getIntent().getExtras();
-        User user = (User) bundle.get(USER_KEY);
+        UserForRegistration userForRegistration = (UserForRegistration) bundle.get(USER_KEY);
 
-        mEmail.setText(user.getEmail());
-        mName.setText(user.getName());
+        mEmail.setText(userForRegistration.getEmail());
+        mName.setText(userForRegistration.getName());
 
     }
 

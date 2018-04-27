@@ -1,52 +1,53 @@
 package com.example.ivanovnv.myfirstapplication.model;
 
-import com.google.gson.annotations.SerializedName;
 
 import java.io.Serializable;
 
-/**
- * Created by IvanovNV on 21.02.2018.
- */
+public class User implements Serializable{
 
-public class User implements Serializable {
-    @SerializedName("email")
-    private String mEmail;
-    @SerializedName("password")
-    private String mPassword;
-    @SerializedName("name")
-    private String mName;
-    private boolean mHasSuccessLogin;
 
-    public User(String mEmail, String mName, String mPassword) {
-        this.mEmail = mEmail;
-        this.mPassword = mPassword;
-        this.mName = mName;
+    /**
+     * data : {"id":0,"name":"string","email":"string"}
+     */
+
+    private DataBean data;
+
+    public DataBean getData() {
+        return data;
     }
 
-    public String getEmail() {
-        return mEmail;
+    public void setData(DataBean data) {
+        this.data = data;
     }
 
-    public String getPassword() {
-        return mPassword;
-    }
+    public static class DataBean {
 
-    public boolean getHasSuccessLogin() {return mHasSuccessLogin;}
+        private int id;
+        private String name;
+        private String email;
 
-    public void setEmail(String mEmail) {
-        this.mEmail = mEmail;
-    }
+        public int getId() {
+            return id;
+        }
 
-    public void setPassword(String mPassword) {
-        this.mPassword = mPassword;
-    }
+        public void setId(int id) {
+            this.id = id;
+        }
 
-    public void setHasSuccessLogin(boolean mHasSuccessLogin) {
-        this.mHasSuccessLogin = mHasSuccessLogin;
-    }
+        public String getName() {
+            return name;
+        }
 
+        public void setName(String name) {
+            this.name = name;
+        }
 
-    public String getName() {
-        return mName;
+        public String getEmail() {
+            return email;
+        }
+
+        public void setEmail(String email) {
+            this.email = email;
+        }
     }
 }

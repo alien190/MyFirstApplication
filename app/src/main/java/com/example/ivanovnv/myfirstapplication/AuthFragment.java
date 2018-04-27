@@ -17,16 +17,8 @@ import android.widget.EditText;
 import android.widget.Toast;
 
 import com.example.ivanovnv.myfirstapplication.model.User;
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
+import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
-import java.io.IOException;
-
-import okhttp3.Call;
-import okhttp3.Callback;
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.Response;
 
 public class AuthFragment extends Fragment {
 
@@ -50,31 +42,13 @@ public class AuthFragment extends Fragment {
         public void onClick(View v) {
             if (isEmailValid() && isPasswordValid()) {
 
-                Request request = new Request.Builder()
-                        .url(BuildConfig.SERVER_URL.concat("user/"))
-                        .build();
-
-                OkHttpClient client = ApiUtils.getBasicAuthClient(
-                        mLogin.getText().toString(),
-                        mPassword.getText().toString(),
-                        true);
-
-                client.newCall(request).enqueue(new Callback() {
+                ApiUtils.getApi(mLogin.getText().toString(), mPassword.getText().toString())
+                        .getUser().enqueue(new retrofit2.Callback<User>() {
 
                     Handler handler = new Handler(getActivity().getMainLooper());
 
                     @Override
-                    public void onFailure(Call call, IOException e) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                showMessage(R.string.request_error);
-                            }
-                        });
-                    }
-
-                    @Override
-                    public void onResponse(Call call, final Response response) throws IOException {
+                    public void onResponse(retrofit2.Call<User> call, final retrofit2.Response<User> response) {
                         handler.post(new Runnable() {
                             @Override
                             public void run() {
@@ -82,23 +56,34 @@ public class AuthFragment extends Fragment {
                                     //todo детеальная обработка ошибок
                                     showMessage(R.string.auth_error);
                                 } else {
-                                    try {
-                                        Gson gson = new Gson();
-                                        JsonObject json = gson.fromJson(response.body().string(), JsonObject.class);
-                                        User user = gson.fromJson(json.get("data"), User.class);
+                                    if (response.body() != null) {
+
+                                        UserForRegistration userForRegistration =
+                                                new UserForRegistration(response.body().getData().getEmail(),
+                                                        response.body().getData().getName(), "");
+
                                         Intent startProfileIntent =
                                                 new Intent(getActivity(), ProfileActivity.class);
-                                        startProfileIntent.putExtra(ProfileActivity.USER_KEY, user);
+                                        startProfileIntent.putExtra(ProfileActivity.USER_KEY, userForRegistration);
                                         startActivity(startProfileIntent);
                                         getActivity().finish();
-                                    } catch (IOException e) {
-                                        e.printStackTrace();
                                     }
                                 }
                             }
                         });
                     }
+
+                    @Override
+                    public void onFailure(retrofit2.Call<User> call, Throwable t) {
+                        handler.post(new Runnable() {
+                            @Override
+                            public void run() {
+                                showMessage(R.string.request_error);
+                            }
+                        });
+                    }
                 });
+
             } else {
                 showMessage(R.string.login_input_error);
             }
@@ -117,14 +102,6 @@ public class AuthFragment extends Fragment {
         }
     };
 
-    private View.OnFocusChangeListener mOnLoginFocusListener = new View.OnFocusChangeListener() {
-        @Override
-        public void onFocusChange(View v, boolean hasFocus) {
-            if (hasFocus) {
-                // mLogin.showDropDown();
-            }
-        }
-    };
 
     private boolean isEmailValid() {
         return !TextUtils.isEmpty(mLogin.getText()) &&
@@ -152,30 +129,8 @@ public class AuthFragment extends Fragment {
 
         mEnter.setOnClickListener(mOnEnterClickListener);
         mRegister.setOnClickListener(mOnRegisterClickListener);
-        mLogin.setOnFocusChangeListener(mOnLoginFocusListener);
 
         return v;
     }
 
-    /*
-        @Override
-        public void onResume() {
-
-            super.onResume();
-        }
-        */
-/*
-    @Override
-    public void onPause() {
-        mEnter.setOnClickListener(null);
-        mRegister.setOnClickListener(null);
-        mLogin.setOnFocusChangeListener(null);
-        super.onPause();
-    }
-*/
-//    @Override
-//    public void onDestroy() {
-//        mLoginedUsersAdapter = null;
-//        super.onDestroy();
-//    }
-}
+   }

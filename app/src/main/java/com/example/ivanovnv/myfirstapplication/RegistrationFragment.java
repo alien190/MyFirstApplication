@@ -6,6 +6,7 @@ import android.support.annotation.Nullable;
 import android.support.annotation.StringRes;
 import android.support.v4.app.Fragment;
 import android.text.TextUtils;
+import android.util.Log;
 import android.util.Patterns;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -14,6 +15,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.ivanovnv.myfirstapplication.model.RegistrationError;
 import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
 import okhttp3.MediaType;
@@ -60,8 +62,9 @@ public class RegistrationFragment extends Fragment {
                                             showMessage(R.string.login_register_success);
                                             getFragmentManager().popBackStack();
                                         } else {
-                                            //todo детеальная обработка ошибок
-                                            showMessage(R.string.login_register_error);
+                                            RegistrationError error = ApiUtils.parseRegistrationError(response);
+                                            showMessage(R.string.validation_error);
+                                            showError(error);
                                         }
                                     }
                                 });
@@ -94,7 +97,6 @@ public class RegistrationFragment extends Fragment {
         mPasswordAgain = view.findViewById(R.id.etRegPasswordAgain);
         mRegistration = view.findViewById(R.id.btnRegRegistration);
         mName = view.findViewById(R.id.et_name);
-
         mRegistration.setOnClickListener(mOnRegistrationClickListener);
 
         return view;
@@ -121,5 +123,18 @@ public class RegistrationFragment extends Fragment {
 
     private void showMessage(@StringRes int string) {
         Toast.makeText(getActivity(), string, Toast.LENGTH_SHORT).show();
+    }
+
+    private void showError(RegistrationError error) {
+        if (error.getErrors().getEmail() != null) {
+            mLogin.setError(error.getErrors().getEmail().toArray()[0].toString());
+        }
+        if (error.getErrors().getPassword() != null) {
+            mPassword.setError(error.getErrors().getPassword().toArray()[0].toString());
+            mPasswordAgain.setError(error.getErrors().getPassword().toArray()[0].toString());
+        }
+        if (error.getErrors().getName() != null) {
+            mName.setError(error.getErrors().getName().toArray()[0].toString());
+        }
     }
 }

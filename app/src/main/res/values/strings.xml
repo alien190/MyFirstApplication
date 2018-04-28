@@ -16,4 +16,5 @@
     <string name="request_error">Ошибка запроса регистрации</string>
     <string name="auth_error">Ошибка аутентификации</string>
     <string name="name">Имя</string>
+    <string name="validation_error">Ошибка валидации</string>
 </resources>

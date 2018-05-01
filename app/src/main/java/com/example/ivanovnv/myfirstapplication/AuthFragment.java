@@ -19,6 +19,12 @@ import android.widget.Toast;
 import com.example.ivanovnv.myfirstapplication.model.User;
 import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
+import io.reactivex.Scheduler;
+import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
+
 
 public class AuthFragment extends Fragment {
 
@@ -43,47 +49,33 @@ public class AuthFragment extends Fragment {
             if (isEmailValid() && isPasswordValid()) {
 
                 ApiUtils.getApi(mLogin.getText().toString(), mPassword.getText().toString())
-                        .getUser().enqueue(new retrofit2.Callback<User>() {
-
-                    Handler handler = new Handler(getActivity().getMainLooper());
-
-                    @Override
-                    public void onResponse(retrofit2.Call<User> call, final retrofit2.Response<User> response) {
-                        handler.post(new Runnable() {
+                        .getUser()
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new SingleObserver<User>() {
                             @Override
-                            public void run() {
-                                if (!response.isSuccessful()) {
-                                    //todo детеальная обработка ошибок
-                                    showMessage(R.string.auth_error);
-                                } else {
-                                    if (response.body() != null) {
+                            public void onSubscribe(Disposable d) {
 
-                                        UserForRegistration userForRegistration =
-                                                new UserForRegistration(response.body().getData().getEmail(),
-                                                        response.body().getData().getName(), "");
+                            }
 
-                                        Intent startProfileIntent =
-                                                new Intent(getActivity(), ProfileActivity.class);
-                                        startProfileIntent.putExtra(ProfileActivity.USER_KEY, userForRegistration);
-                                        startActivity(startProfileIntent);
-                                        getActivity().finish();
-                                    }
-                                }
+                            @Override
+                            public void onSuccess(User user) {
+                                UserForRegistration userForRegistration =
+                                        new UserForRegistration(user.getData().getEmail(),
+                                                user.getData().getName(), "");
+
+                                Intent startProfileIntent =
+                                        new Intent(getActivity(), ProfileActivity.class);
+                                startProfileIntent.putExtra(ProfileActivity.USER_KEY, userForRegistration);
+                                startActivity(startProfileIntent);
+                                getActivity().finish();
+                            }
+
+                            @Override
+                            public void onError(Throwable e) {
+                                showMessage(R.string.auth_error);
                             }
                         });
-                    }
-
-                    @Override
-                    public void onFailure(retrofit2.Call<User> call, Throwable t) {
-                        handler.post(new Runnable() {
-                            @Override
-                            public void run() {
-                                showMessage(R.string.request_error);
-                            }
-                        });
-                    }
-                });
-
             } else {
                 showMessage(R.string.login_input_error);
             }

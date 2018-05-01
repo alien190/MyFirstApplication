@@ -1,5 +1,6 @@
 package com.example.ivanovnv.myfirstapplication;
 
+import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -18,7 +19,12 @@ import android.widget.Toast;
 import com.example.ivanovnv.myfirstapplication.model.RegistrationError;
 import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.functions.Action;
+import io.reactivex.functions.Consumer;
+import io.reactivex.schedulers.Schedulers;
 import okhttp3.MediaType;
+import retrofit2.HttpException;
 
 /**
  * Created by IvanovNV on 21.02.2018.
@@ -38,6 +44,7 @@ public class RegistrationFragment extends Fragment {
     }
 
     private View.OnClickListener mOnRegistrationClickListener = new View.OnClickListener() {
+        @SuppressLint("CheckResult")
         @Override
         public void onClick(View v) {
 
@@ -49,35 +56,23 @@ public class RegistrationFragment extends Fragment {
                         mPassword.getText().toString());
 
 
-                ApiUtils.getApi().registration(userForRegistration).enqueue(
-                        new retrofit2.Callback<Void>() {
-                            Handler handler = new Handler(getActivity().getMainLooper());
-
+                ApiUtils.getApi()
+                        .registration(userForRegistration)
+                        .subscribeOn(Schedulers.io())
+                        .observeOn(AndroidSchedulers.mainThread())
+                        .subscribe(new Action() {
                             @Override
-                            public void onResponse(retrofit2.Call<Void> call, final retrofit2.Response<Void> response) {
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        if (response.isSuccessful()) {
-                                            showMessage(R.string.login_register_success);
-                                            getFragmentManager().popBackStack();
-                                        } else {
-                                            RegistrationError error = ApiUtils.parseRegistrationError(response);
-                                            showMessage(R.string.validation_error);
-                                            showError(error);
-                                        }
-                                    }
-                                });
+                            public void run() throws Exception {
+                                showMessage(R.string.login_register_success);
+                                getFragmentManager().popBackStack();
                             }
-
+                        }, new Consumer<Throwable>() {
                             @Override
-                            public void onFailure(retrofit2.Call<Void> call, Throwable t) {
-                                handler.post(new Runnable() {
-                                    @Override
-                                    public void run() {
-                                        showMessage(R.string.request_error);
-                                    }
-                                });
+                            public void accept(Throwable throwable) throws Exception {
+                                showMessage(R.string.request_error);
+                                HttpException exception = (HttpException) throwable;
+                                RegistrationError error = ApiUtils.parseRegistrationError((retrofit2.Response<Void>)exception.response());
+                                showError(error);
                             }
                         });
 

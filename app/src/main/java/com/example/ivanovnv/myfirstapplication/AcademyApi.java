@@ -7,6 +7,8 @@ import com.example.ivanovnv.myfirstapplication.model.Songs;
 import com.example.ivanovnv.myfirstapplication.model.User;
 import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
+import io.reactivex.Completable;
+import io.reactivex.Single;
 import retrofit2.Call;
 import retrofit2.http.Body;
 import retrofit2.http.GET;
@@ -16,10 +18,10 @@ import retrofit2.http.Path;
 public interface AcademyApi {
 
     @POST("registration")
-    Call<Void> registration(@Body UserForRegistration userForRegistration);
+    Completable registration(@Body UserForRegistration userForRegistration);
 
     @GET("user")
-    Call<User> getUser();
+    Single<User> getUser();
 
     @GET("albums")
     Call<Albums> getAlbums();

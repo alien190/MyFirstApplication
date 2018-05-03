@@ -4,18 +4,6 @@ import com.google.gson.annotations.SerializedName;
 
 public class Song {
 
-    @SerializedName("data")
-    private DataBean mData;
-
-    public DataBean getData() {
-        return mData;
-    }
-
-    public void setData(DataBean data) {
-        mData = data;
-    }
-
-    public static class DataBean {
         @SerializedName("id")
         private int mId;
         @SerializedName("name")
@@ -46,5 +34,4 @@ public class Song {
         public void setDuration(String duration) {
             mDuration = duration;
         }
-    }
 }

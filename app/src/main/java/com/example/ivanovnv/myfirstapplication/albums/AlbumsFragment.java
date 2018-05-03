@@ -86,7 +86,7 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 .subscribe(albums -> {
                     mErrorView.setVisibility(View.GONE);
                     mRecyclerView.setVisibility(View.VISIBLE);
-                    mAlbumAdapter.addData(albums.getData(), true);
+                    mAlbumAdapter.addData(albums, true);
                 }, throwable -> {
                     mErrorView.setVisibility(View.VISIBLE);
                     mRecyclerView.setVisibility(View.GONE);

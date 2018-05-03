@@ -21,6 +21,7 @@ public abstract class SingleFragmentActivity extends AppCompatActivity{
             android.support.v4.app.FragmentManager fragmentManager = getSupportFragmentManager();
             fragmentManager.beginTransaction()
                     .replace(R.id.fragment_container,getFragment())
+                    .addToBackStack(getFragment().getClass().getSimpleName())
                     .commit();
         }
     }

@@ -3,6 +3,7 @@ package com.example.ivanovnv.myfirstapplication;
 import android.support.annotation.Nullable;
 
 import com.example.ivanovnv.myfirstapplication.model.RegistrationError;
+import com.example.ivanovnv.myfirstapplication.model.converter.DataConverterFactory;
 import com.google.gson.Gson;
 
 import java.io.IOException;
@@ -59,6 +60,7 @@ public class ApiUtils {
                     .baseUrl(BuildConfig.SERVER_URL)
                     //need for interceptors
                     .client(getBasicAuthClient(email, password, newInstance))
+                    .addConverterFactory(new DataConverterFactory())
                     .addConverterFactory(GsonConverterFactory.create(gson))
                     .addCallAdapterFactory(RxJava2CallAdapterFactory.create())
                     .build();

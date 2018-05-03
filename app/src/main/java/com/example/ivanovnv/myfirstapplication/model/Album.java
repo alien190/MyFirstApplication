@@ -2,32 +2,10 @@ package com.example.ivanovnv.myfirstapplication.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
-public class Album {
-
-    /**
-     * data : {"id":0,"name":"string","songs":[{"id":0,"name":"string","duration":"string"}],"release_date":"2018-04-26T14:50:58.754Z"}
-     */
-
-    @SerializedName("data")
-    private DataBean mData;
-
-    public DataBean getData() {
-        return mData;
-    }
-
-    public void setData(DataBean data) {
-        mData = data;
-    }
-
-    public static class DataBean {
-        /**
-         * id : 0
-         * name : string
-         * songs : [{"id":0,"name":"string","duration":"string"}]
-         * release_date : 2018-04-26T14:50:58.754Z
-         */
+public class Album implements Serializable{
 
         @SerializedName("id")
         private int mId;
@@ -36,7 +14,7 @@ public class Album {
         @SerializedName("release_date")
         private String mReleaseDate;
         @SerializedName("songs")
-        private List<Song.DataBean> mSongs;
+        private List<Song> mSongs;
 
         public int getId() {
             return mId;
@@ -62,13 +40,12 @@ public class Album {
             mReleaseDate = releaseDate;
         }
 
-        public List<Song.DataBean> getSongs() {
+        public List<Song> getSongs() {
             return mSongs;
         }
 
-        public void setSongs(List<Song.DataBean> songs) {
+        public void setSongs(List<Song> songs) {
             mSongs = songs;
         }
 
     }
-}

@@ -60,20 +60,14 @@ public class RegistrationFragment extends Fragment {
                         .registration(userForRegistration)
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new Action() {
-                            @Override
-                            public void run() throws Exception {
-                                showMessage(R.string.login_register_success);
-                                getFragmentManager().popBackStack();
-                            }
-                        }, new Consumer<Throwable>() {
-                            @Override
-                            public void accept(Throwable throwable) throws Exception {
-                                showMessage(R.string.request_error);
-                                HttpException exception = (HttpException) throwable;
-                                RegistrationError error = ApiUtils.parseRegistrationError((retrofit2.Response<Void>)exception.response());
-                                showError(error);
-                            }
+                        .subscribe(() -> {
+                            showMessage(R.string.login_register_success);
+                            getFragmentManager().popBackStack();
+                        }, throwable -> {
+                            showMessage(R.string.request_error);
+                            HttpException exception = (HttpException) throwable;
+                            RegistrationError error = ApiUtils.parseRegistrationError((retrofit2.Response<Void>)exception.response());
+                            showError(error);
                         });
 
             } else {

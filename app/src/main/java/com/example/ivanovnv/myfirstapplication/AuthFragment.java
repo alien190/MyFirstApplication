@@ -1,5 +1,6 @@
 package com.example.ivanovnv.myfirstapplication;
 
+import android.annotation.SuppressLint;
 import android.content.Intent;
 import android.os.Handler;
 import android.support.annotation.Nullable;
@@ -16,6 +17,7 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.example.ivanovnv.myfirstapplication.albums.AlbumsActivity;
 import com.example.ivanovnv.myfirstapplication.model.User;
 import com.example.ivanovnv.myfirstapplication.model.UserForRegistration;
 
@@ -23,6 +25,7 @@ import io.reactivex.Scheduler;
 import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 
@@ -44,6 +47,7 @@ public class AuthFragment extends Fragment {
     }
 
     private View.OnClickListener mOnEnterClickListener = new View.OnClickListener() {
+        @SuppressLint("CheckResult")
         @Override
         public void onClick(View v) {
             if (isEmailValid() && isPasswordValid()) {
@@ -52,30 +56,19 @@ public class AuthFragment extends Fragment {
                         .getUser()
                         .subscribeOn(Schedulers.io())
                         .observeOn(AndroidSchedulers.mainThread())
-                        .subscribe(new SingleObserver<User>() {
-                            @Override
-                            public void onSubscribe(Disposable d) {
-
-                            }
-
-                            @Override
-                            public void onSuccess(User user) {
-                                UserForRegistration userForRegistration =
-                                        new UserForRegistration(user.getData().getEmail(),
-                                                user.getData().getName(), "");
-
-                                Intent startProfileIntent =
-                                        new Intent(getActivity(), ProfileActivity.class);
-                                startProfileIntent.putExtra(ProfileActivity.USER_KEY, userForRegistration);
-                                startActivity(startProfileIntent);
-                                getActivity().finish();
-                            }
-
-                            @Override
-                            public void onError(Throwable e) {
-                                showMessage(R.string.auth_error);
-                            }
-                        });
+                        .subscribe(user -> {
+//                                UserForRegistration userForRegistration =
+//                                        new UserForRegistration(user.getData().getEmail(),
+//                                                user.getData().getName(), "");
+//
+//                                Intent startProfileIntent =
+//                                        new Intent(getActivity(), ProfileActivity.class);
+//                                startProfileIntent.putExtra(ProfileActivity.USER_KEY, userForRegistration);
+//                                startActivity(startProfileIntent);
+//                                getActivity().finish();
+                            startActivity(new Intent(getActivity(), AlbumsActivity.class));
+                            getActivity().finish();
+                        }, throwable -> showMessage(R.string.auth_error));
             } else {
                 showMessage(R.string.login_input_error);
             }
@@ -125,4 +118,4 @@ public class AuthFragment extends Fragment {
         return v;
     }
 
-   }
+}

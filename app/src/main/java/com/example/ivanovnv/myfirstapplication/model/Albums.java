@@ -2,6 +2,7 @@ package com.example.ivanovnv.myfirstapplication.model;
 
 import com.google.gson.annotations.SerializedName;
 
+import java.io.Serializable;
 import java.util.List;
 
 public class Albums {
@@ -18,7 +19,7 @@ public class Albums {
         mData = data;
     }
 
-    public static class DataBean {
+    public static class DataBean implements Serializable{
         @SerializedName("id")
         private int mId;
         @SerializedName("name")

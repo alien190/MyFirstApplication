@@ -17,4 +17,9 @@
     <string name="auth_error">Ошибка аутентификации</string>
     <string name="name">Имя</string>
     <string name="validation_error">Ошибка валидации</string>
+    <string name="albums">Альбомы</string>
+
+    <string name="response_code_204">Успешная регистрация</string>
+    <string name="response_code_400">Ошибка валидации</string>
+    <string name="response_code_404">Альбома не существует</string>
 </resources>

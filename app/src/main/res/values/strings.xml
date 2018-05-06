@@ -22,6 +22,6 @@
     <string name="response_code_204">Успешная регистрация</string>
     <string name="response_code_400">Ошибка валидации</string>
     <string name="response_code_404">Альбома не существует</string>
-    <string name="error_load_from_server">Ошибка загрузки данных с сервера</string>
+    <string name="error_load_from_server">Ошибка загрузки данных с сервера. Использована локальная БД.</string>
     <string name="success_load_fom_server">Данные успешно загружены с сервера</string>
 </resources>

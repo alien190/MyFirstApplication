@@ -22,7 +22,13 @@ import com.example.ivanovnv.myfirstapplication.album.DetailAlbumFragment;
 import com.example.ivanovnv.myfirstapplication.db.MusicDao;
 import com.example.ivanovnv.myfirstapplication.model.Album;
 
+import org.apache.commons.collections4.CollectionUtils;
+import org.apache.commons.collections4.TransformerUtils;
+
 import java.net.UnknownHostException;
+import java.sql.Date;
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -93,11 +99,15 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 .subscribeOn(Schedulers.io())
                 .doOnSuccess(albums -> {
                     getMusicDao().insertAlbums(albums);
+                    List<Album> albumsTmp = getMusicDao().getAlbumsByIds(albums);
+                    showToast(getString(R.string.success_load_fom_server));
+
                 })
                 .onErrorReturn(throwable -> {
                     if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
                         showToast(getString(R.string.error_load_from_server));
                         return getMusicDao().getAlbums();
+                        //return getMusicDao().getAlbumsByIds(new ArrayList<Integer>(){{add(2); add(3);}});
                     } else
                         return null;
                 })

@@ -5,9 +5,12 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
+import android.arch.persistence.room.TypeConverter;
+import android.arch.persistence.room.TypeConverters;
 
 import com.example.ivanovnv.myfirstapplication.model.Album;
 
+import java.util.Date;
 import java.util.List;
 
 @Dao
@@ -24,4 +27,8 @@ public interface MusicDao {
     @Query("DELETE FROM album where id = :albumId")
     void deleteAlbumById(int albumId);
 
+    @Query("SELECT * FROM album where id IN (:albums)")
+    @TypeConverters({AlbumConverter.class})
+    List<Album> getAlbumsByIds(List<Album> albums);
 }
+

@@ -1,6 +1,7 @@
 package com.example.ivanovnv.myfirstapplication.model;
 
 import android.arch.persistence.room.ColumnInfo;
+import android.arch.persistence.room.Embedded;
 import android.arch.persistence.room.Entity;
 import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
@@ -26,8 +27,8 @@ public class Album implements Serializable{
         @ColumnInfo(name = "release")
 
         private String mReleaseDate;
-        @SerializedName("songs")
 
+        @SerializedName("songs")
         @Ignore
         private List<Song> mSongs;
 

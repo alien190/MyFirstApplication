@@ -14,7 +14,7 @@ public class App extends Application {
     public void onCreate() {
         super.onCreate();
 
-        mDataBase = Room.databaseBuilder(getApplicationContext(), DataBase.class, "music_database_new")
+        mDataBase = Room.databaseBuilder(getApplicationContext(), DataBase.class, "music_database_new_01")
                 .allowMainThreadQueries()
                 .build();
     }

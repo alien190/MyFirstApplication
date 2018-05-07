@@ -5,12 +5,10 @@ import android.arch.persistence.room.Delete;
 import android.arch.persistence.room.Insert;
 import android.arch.persistence.room.OnConflictStrategy;
 import android.arch.persistence.room.Query;
-import android.arch.persistence.room.TypeConverter;
-import android.arch.persistence.room.TypeConverters;
 
 import com.example.ivanovnv.myfirstapplication.model.Album;
+import com.example.ivanovnv.myfirstapplication.model.Song;
 
-import java.util.Date;
 import java.util.List;
 
 @Dao
@@ -18,7 +16,7 @@ public interface MusicDao {
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     void insertAlbums(List<Album> albums);
 
-    @Query("SELECT * FROM album")
+    @Query("SELECT * FROM album ORDER BY release ASC")
     List<Album> getAlbums();
 
     @Delete
@@ -27,8 +25,21 @@ public interface MusicDao {
     @Query("DELETE FROM album where id = :albumId")
     void deleteAlbumById(int albumId);
 
-    @Query("SELECT * FROM album where id IN (:albums)")
-    @TypeConverters({AlbumConverter.class})
-    List<Album> getAlbumsByIds(List<Album> albums);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertSongs(List<Song> songs);
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    void insertAlbumSongs(List<AlbumSong> albumSongs);
+
+    @Query("DELETE FROM albumsong WHERE album_id = :albumId")
+    void deleteAlbumSongs(int albumId);
+
+    @Query("SELECT * FROM albumsong where album_id = :albumId")
+    List<AlbumSong> getAlbumSongsByAlbumId(int albumId);
+
+    @Query("SELECT * FROM song LEFT JOIN AlbumSong ON song_id = song.id WHERE album_id = :albumId")
+    List<Song> getSongsByAlbumId(int albumId);
+
 }
 

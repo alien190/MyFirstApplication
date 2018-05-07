@@ -99,7 +99,7 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 .subscribeOn(Schedulers.io())
                 .doOnSuccess(albums -> {
                     getMusicDao().insertAlbums(albums);
-                    List<Album> albumsTmp = getMusicDao().getAlbumsByIds(albums);
+                    //List<Album> albumsTmp = getMusicDao().getAlbumsByIds(albums);
                     showToast(getString(R.string.success_load_fom_server));
 
                 })

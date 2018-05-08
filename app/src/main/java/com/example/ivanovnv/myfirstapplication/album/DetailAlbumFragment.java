@@ -7,10 +7,14 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Toast;
@@ -18,6 +22,7 @@ import android.widget.Toast;
 import com.example.ivanovnv.myfirstapplication.ApiUtils;
 import com.example.ivanovnv.myfirstapplication.App;
 import com.example.ivanovnv.myfirstapplication.R;
+import com.example.ivanovnv.myfirstapplication.comments.CommentsFragment;
 import com.example.ivanovnv.myfirstapplication.db.AlbumSong;
 import com.example.ivanovnv.myfirstapplication.db.MusicDao;
 import com.example.ivanovnv.myfirstapplication.model.Album;
@@ -47,8 +52,14 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
 
         DetailAlbumFragment fragment = new DetailAlbumFragment();
         fragment.setArguments(args);
-
         return fragment;
+    }
+
+    @Override
+    public void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
+        setHasOptionsMenu(true);
     }
 
     @Nullable
@@ -97,7 +108,7 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
                     getMusicDao().insertSongs(album.getSongs());
                     getMusicDao().deleteAlbumSongs(album.getId());
                     getMusicDao().insertAlbumSongs(getAlbumSong(album));
-                   // List<AlbumSong> tmp = getMusicDao().getAlbumSongsByAlbumId(album.getId());
+                    // List<AlbumSong> tmp = getMusicDao().getAlbumSongsByAlbumId(album.getId());
                     showToast(getString(R.string.success_load_fom_server));
                 })
                 .onErrorReturn(throwable -> {
@@ -132,12 +143,31 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
     }
 
     List<AlbumSong> getAlbumSong(Album album) {
-        if(album != null && album.getSongs() != null) {
+        if (album != null && album.getSongs() != null) {
             ArrayList<AlbumSong> albumSongs = new ArrayList<>();
-            for(Song song : album.getSongs()) {
+            for (Song song : album.getSongs()) {
                 albumSongs.add(new AlbumSong(0, album.getId(), song.getId()));
             }
             return albumSongs;
         } else return null;
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        inflater.inflate(R.menu.detail_album_menu, menu);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if(item.getItemId() == R.id.mi_comments) {
+            getFragmentManager().beginTransaction()
+                    .replace(R.id.fragment_container, CommentsFragment.newInstance())
+                    .addToBackStack(CommentsFragment.class.getSimpleName())
+                    .commit();
+
+            return true;
+        }
+
+        return false;
     }
 }

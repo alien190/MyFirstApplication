@@ -43,4 +43,5 @@ public class SongsAdapter extends RecyclerView.Adapter<SongsHolder> {
         mSongs.addAll(data);
         notifyDataSetChanged();
     }
+
 }

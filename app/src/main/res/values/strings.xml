@@ -25,4 +25,6 @@
     <string name="error_load_from_server">Ошибка загрузки данных с сервера. Использована локальная БД.</string>
     <string name="success_load_fom_server">Данные успешно загружены с сервера</string>
     <string name="error_view_msg">Что-то пошло не так. Попробуйте еще раз.</string>
+    <string name="menu_comments">Перейти к комментариям</string>
+    <string name="comments_title">Комментарии</string>
 </resources>

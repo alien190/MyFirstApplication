@@ -27,6 +27,7 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.Observer;
 import io.reactivex.Single;
+import io.reactivex.SingleObserver;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Consumer;
@@ -91,28 +92,12 @@ public class CommentsFragment extends Fragment {
 
         mAlbum = (Album) getArguments().getSerializable(ALBUM_KEY);
 
-        try {
 
-            mRefreshObservable.flatMapSingle(new Function() {
-                @Override
-                public Object apply(Object o) throws Exception {
-                    return ApiUtils.getApi().getAlbumComments(mAlbum.getId()).subscribeOn(Schedulers.io());
-                }
-            })
-                    .subscribe(new Consumer() {
-                        @Override
-                        public void accept(Object o) throws Exception {
-                            Log.d(TAG, "accept: ");
-                        }
-                    }, new Consumer<Throwable>() {
-                        @Override
-                        public void accept(Throwable throwable) throws Exception {
-                            throwable.printStackTrace();
-                        }
-                    });
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        mRefreshObservable
+                .mergeWith(Observable.just(0))
+                .flatMapSingle(function)
+                .subscribe(observer);
+
 
 
   /*      mRefreshObservable.flatMap(new Function() {
@@ -160,15 +145,20 @@ public class CommentsFragment extends Fragment {
         handler.post(() -> Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show());
     }
 
-    Observer mObserver = new Observer() {
+    Observer<Object> observer = new Observer<Object>() {
         @Override
         public void onSubscribe(Disposable d) {
 
         }
 
         @Override
-        public void onNext(Object o) {
-            Log.d(TAG, "onNext: " + Thread.currentThread().getId());
+        public void onNext(Object comments) {
+//            try {
+//                mCommentsAdapter.addData(comments, true);
+//            } catch (Throwable t) {
+//                t.printStackTrace();
+//            }
+            int i = 1;
         }
 
         @Override
@@ -180,7 +170,43 @@ public class CommentsFragment extends Fragment {
         public void onComplete() {
 
         }
+    };
 
+    Function<Integer, Single<?>> function = new Function<Integer, Single<?>>() {
+        @Override
+        public Single<?> apply(Integer id) throws Exception {
+
+            Single<?> comments;
+
+            if (id == 0) {   comments = ApiUtils.getApi().getAlbumComments(mAlbum.getId());}
+            else { comments = ApiUtils.getApi().getComment(id);}
+
+            return comments
+                    .subscribeOn(Schedulers.io())
+                    .onErrorReturn(throwable -> {
+                        if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
+                            showToast(getString(R.string.error_load_from_server));
+                            return null;
+                        } else
+                            return null;
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doFinally(() -> mRefresher.setRefreshing(false))
+                    .doOnSubscribe(disposable -> mRefresher.setRefreshing(true));
+        }
     };
 
 }
+
+
+//new Consumer<List<Comment>>() {
+//@Override
+//public void accept(List<Comment> comments) throws Exception {
+//        mCommentsAdapter.addData(comments, true);
+//        }
+//        }, new Consumer<Throwable>() {
+//@Override
+//public void accept(Throwable throwable) throws Exception {
+//        throwable.printStackTrace();
+//        }
+//        }

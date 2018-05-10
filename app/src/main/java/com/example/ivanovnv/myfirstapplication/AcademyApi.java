@@ -38,4 +38,7 @@ public interface AcademyApi {
 
     @GET("albums/{id}/comments")
     Single<List<Comment>> getAlbumComments(@Path("id") int id);
+
+    @GET("comments/{id}")
+    Single<Comment> getComment(@Path("id") int id);
 }

@@ -20,20 +20,8 @@ import com.example.ivanovnv.myfirstapplication.App;
 import com.example.ivanovnv.myfirstapplication.R;
 import com.example.ivanovnv.myfirstapplication.album.DetailAlbumFragment;
 import com.example.ivanovnv.myfirstapplication.db.MusicDao;
-import com.example.ivanovnv.myfirstapplication.model.Album;
-
-import org.apache.commons.collections4.CollectionUtils;
-import org.apache.commons.collections4.TransformerUtils;
-
-import java.net.UnknownHostException;
-import java.sql.Date;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
 
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
-import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
 /**

@@ -7,7 +7,6 @@ import android.os.Looper;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -27,12 +26,14 @@ import com.example.ivanovnv.myfirstapplication.db.AlbumSong;
 import com.example.ivanovnv.myfirstapplication.db.MusicDao;
 import com.example.ivanovnv.myfirstapplication.model.Album;
 import com.example.ivanovnv.myfirstapplication.model.Song;
+import com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout;
+import com.jakewharton.rxbinding2.view.RxView;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.functions.Consumer;
 import io.reactivex.schedulers.Schedulers;
 
 public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.OnRefreshListener {
@@ -42,6 +43,7 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
     private SwipeRefreshLayout mRefresher;
     private View mErrorView;
     private Album mAlbum;
+
 
     @NonNull
     private final SongsAdapter mSongsAdapter = new SongsAdapter();
@@ -74,6 +76,7 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
         mRefresher = view.findViewById(R.id.refresher);
         mRefresher.setOnRefreshListener(this);
         mErrorView = view.findViewById(R.id.errorView);
+
     }
 
     @Override
@@ -161,7 +164,7 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
     public boolean onOptionsItemSelected(MenuItem item) {
         if(item.getItemId() == R.id.mi_comments) {
             getFragmentManager().beginTransaction()
-                    .replace(R.id.fragment_container, CommentsFragment.newInstance())
+                    .replace(R.id.fragment_container, CommentsFragment.newInstance(mAlbum))
                     .addToBackStack(CommentsFragment.class.getSimpleName())
                     .commit();
 

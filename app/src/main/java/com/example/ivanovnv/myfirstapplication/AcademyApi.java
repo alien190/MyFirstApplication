@@ -37,5 +37,5 @@ public interface AcademyApi {
     Call<Song> getSong(@Path("id") int id);
 
     @GET("albums/{id}/comments")
-    Single<List<Comment>> getAlbumComments(int id);
+    Single<List<Comment>> getAlbumComments(@Path("id") int id);
 }

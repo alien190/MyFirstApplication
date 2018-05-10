@@ -25,32 +25,37 @@
             android:id="@+id/tv_user"
             />
 
-        <android.support.constraint.ConstraintLayout
+        <RelativeLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:background="@drawable/bg_message03"
-            android:gravity="start"
+            android:background="@drawable/bg_message04"
+
             android:orientation="vertical"
-            android:id="@+id/cl_background">
+            android:id="@+id/cl_background"
+            android:layout_marginStart="@dimen/li_margin"
+            android:layout_marginEnd="@dimen/li_margin"
+            android:layout_marginBottom="@dimen/li_margin">
 
             <TextView
                 android:id="@+id/tv_text"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:padding="@dimen/padding"
                 android:textColor="@color/colorBlack"
-                tools:text="sample text" />
+                tools:text="bla-bla-bla" />
 
             <TextView
                 android:id="@+id/tv_timestamp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="12:00"
-                app:layout_constraintRight_toRightOf="@id/tv_text"
-                app:layout_constraintTop_toBottomOf="@id/tv_text"
-                tools:text="12:00" />
+                android:layout_alignParentBottom="true"
+                android:layout_alignParentEnd="true"
+                tools:text="12:00"
 
-        </android.support.constraint.ConstraintLayout>
+             />
+
+        </RelativeLayout>
     </LinearLayout>
 
 </LinearLayout>

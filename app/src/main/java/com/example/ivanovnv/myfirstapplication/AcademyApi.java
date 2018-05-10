@@ -1,5 +1,6 @@
 package com.example.ivanovnv.myfirstapplication;
 
+import com.example.ivanovnv.myfirstapplication.comments.Comment;
 import com.example.ivanovnv.myfirstapplication.model.Album;
 import com.example.ivanovnv.myfirstapplication.model.Song;
 import com.example.ivanovnv.myfirstapplication.model.User;
@@ -34,4 +35,7 @@ public interface AcademyApi {
 
     @GET("songs/{id}")
     Call<Song> getSong(@Path("id") int id);
+
+    @GET("albums/{id}/comments")
+    Single<List<Comment>> getAlbumComments(int id);
 }

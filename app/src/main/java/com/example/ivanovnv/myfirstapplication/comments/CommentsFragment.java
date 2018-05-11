@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
+import android.widget.ImageButton;
 import android.widget.Toast;
 
 import com.example.ivanovnv.myfirstapplication.ApiUtils;
@@ -22,9 +24,12 @@ import com.example.ivanovnv.myfirstapplication.model.Album;
 import com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout;
 
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.SingleObserver;
@@ -44,6 +49,8 @@ public class CommentsFragment extends Fragment {
     Album mAlbum;
     private SwipeRefreshLayout mRefresher;
     Observable mRefreshObservable;
+    ImageButton mSendButton;
+    Observable<Integer> mObservableClick;
 
 
     public static CommentsFragment newInstance(Album album) {
@@ -75,6 +82,8 @@ public class CommentsFragment extends Fragment {
         mRecyclerView.setAdapter(mCommentsAdapter);
         mRefresher = view.findViewById(R.id.sr_comments);
         mRefreshObservable = RxSwipeRefreshLayout.refreshes(mRefresher);
+        mSendButton = view.findViewById(R.id.bt_new_comment);
+
 
 //        mRefreshObservable.flatMap(new Function() {
 //            @Override
@@ -92,9 +101,36 @@ public class CommentsFragment extends Fragment {
 
         mAlbum = (Album) getArguments().getSerializable(ALBUM_KEY);
 
+//        mRefreshObservable.subscribe(new Consumer() {
+//            @Override
+//            public void accept(Object o) throws Exception {
+//                int i = 1;
+//            }
+//        });
 
-        mRefreshObservable
+
+        mObservableClick = Observable.create(new ObservableOnSubscribe<Integer>() {
+            @Override
+            public void subscribe(final ObservableEmitter emitter) throws Exception {
+                mSendButton.setOnClickListener(new View.OnClickListener() {
+                    @Override
+                    public void onClick(View v) {
+                        emitter.onNext(10);
+                    }
+                });
+            }
+        });
+
+        mRefreshObservable.flatMap(o -> Observable.just(0))
                 .mergeWith(Observable.just(0))
+                .flatMap(new Function() {
+                    @Override
+                    public Object apply(Object o) throws Exception {
+                        mCommentsAdapter.clearContent();
+                        return Observable.just(o);
+                    }
+                })
+                .mergeWith(mObservableClick)
                 .flatMapSingle(function)
                 .subscribe(observer);
 
@@ -153,6 +189,21 @@ public class CommentsFragment extends Fragment {
 
         @Override
         public void onNext(Object comments) {
+            try {
+
+                mCommentsAdapter.addData((List<Comment>) comments, false);
+
+//                if (comments instanceof List && !((List) comments).isEmpty() && ((List) comments).get(0) instanceof Comment) {
+//                    mCommentsAdapter.addData((List<Comment>) comments, true);
+//                }
+//
+//                if (comments instanceof Comment) {
+//                    mCommentsAdapter.addComment((Comment) comments);
+//                }
+
+            } catch (Throwable t) {
+                t.printStackTrace();
+            }
 //            try {
 //                mCommentsAdapter.addData(comments, true);
 //            } catch (Throwable t) {
@@ -163,7 +214,7 @@ public class CommentsFragment extends Fragment {
 
         @Override
         public void onError(Throwable e) {
-
+            e.printStackTrace();
         }
 
         @Override
@@ -172,21 +223,29 @@ public class CommentsFragment extends Fragment {
         }
     };
 
-    Function<Integer, Single<?>> function = new Function<Integer, Single<?>>() {
+    Function<Integer, Single<List<Comment>>> function = new Function<Integer, Single<List<Comment>>>() {
         @Override
-        public Single<?> apply(Integer id) throws Exception {
+        public Single<List<Comment>> apply(Integer id) throws Exception {
 
-            Single<?> comments;
+            Single<List<Comment>> comments;
 
-            if (id == 0) {   comments = ApiUtils.getApi().getAlbumComments(mAlbum.getId());}
-            else { comments = ApiUtils.getApi().getComment(id);}
+            if (id == 0) {
+                comments = ApiUtils.getApi().getAlbumComments(mAlbum.getId());
+            } else {
+                comments = ApiUtils.getApi().getComment(id).map(comment -> new ArrayList<Comment>() {{
+                    add(comment);
+                }});
+            }
 
             return comments
                     .subscribeOn(Schedulers.io())
                     .onErrorReturn(throwable -> {
                         if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
                             showToast(getString(R.string.error_load_from_server));
-                            return null;
+
+                            return new ArrayList<Comment>() {{
+                                add(new Comment("dsadsa", "from DB", "1964-12-15T00:00:00+00:00"));
+                            }};
                         } else
                             return null;
                     })

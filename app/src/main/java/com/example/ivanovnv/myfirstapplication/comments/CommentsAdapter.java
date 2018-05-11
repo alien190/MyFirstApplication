@@ -41,6 +41,22 @@ public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
             mComments.clear();
         }
         mComments.addAll(modifyDate(data));
+
+        if(data.size() == 1) {
+            //todo разобраться с прокруткой RecycleView при добавлении нового элемента
+            notifyItemInserted(getItemCount() - 1);
+        } else {
+            notifyDataSetChanged();
+        }
+    }
+
+    public void addComment(Comment data) throws Exception {
+        mComments.add(data);
+        notifyItemInserted(getItemCount()-1);
+    }
+
+    public void clearContent() {
+        mComments.clear();
         notifyDataSetChanged();
     }
 

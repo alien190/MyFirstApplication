@@ -69,10 +69,10 @@ public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
         return Observable.just(comments.size());
     };
 
-    public Function<Object, Observable<Object>> clearContent = o -> {
+    public Function<Integer, Observable<Integer>> clearContent = id -> {
         mComments.clear();
         notifyDataSetChanged();
-        return Observable.just(o);
+        return Observable.just(id);
     };
 
     List<Comment> modifyDate(List<Comment> comments) throws Exception{

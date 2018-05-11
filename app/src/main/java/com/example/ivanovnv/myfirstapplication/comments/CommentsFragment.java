@@ -10,6 +10,7 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -32,6 +33,7 @@ import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Function;
+import io.reactivex.functions.Predicate;
 import io.reactivex.schedulers.Schedulers;
 
 public class CommentsFragment extends Fragment {
@@ -126,13 +128,21 @@ public class CommentsFragment extends Fragment {
 //        });
 
         //.flatMapSingle(postComment)
-        mRefreshObservable.flatMap(o -> Observable.just(0))
-                .mergeWith(Observable.just(0))
-                .flatMap(mCommentsAdapter.clearContent)
-                .mergeWith(mSendButtonObservable.flatMapSingle(postComment))
-                .flatMapSingle(getComment)
-                .flatMap(mCommentsAdapter.addComments)
-                .subscribe(observer);
+        try {
+            mRefreshObservable.flatMap((Function<Object, Observable<Integer>>) o -> Observable.just(0))
+                    .mergeWith(Observable.just(0))
+                    .flatMap(mCommentsAdapter.clearContent)
+                    .mergeWith(mSendButtonObservable.flatMapSingle(postComment))
+                    .filter((Predicate<Integer>) id -> {
+                        if(id == -1) mRefresher.setRefreshing(false);
+                        return id != -1;
+                    })
+                    .flatMapSingle(getComment)
+                    .flatMap(mCommentsAdapter.addComments)
+                    .subscribe(observer);
+        } catch (Throwable t) {
+            t.printStackTrace();
+        }
 
 
 
@@ -197,7 +207,7 @@ public class CommentsFragment extends Fragment {
 
         @Override
         public void onError(Throwable e) {
-
+            e.printStackTrace();
         }
 
         @Override
@@ -275,7 +285,8 @@ public class CommentsFragment extends Fragment {
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .doFinally(() -> mRefresher.setRefreshing(false))
-                    .doOnSubscribe(disposable -> mRefresher.setRefreshing(true));
+                    .doOnSubscribe(disposable -> {
+                        if (!mRefresher.isRefreshing()) mRefresher.setRefreshing(true);});
         }
     };
 
@@ -289,18 +300,16 @@ public class CommentsFragment extends Fragment {
                     .subscribeOn(Schedulers.io())
                     .onErrorReturn(throwable -> {
                         if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
-                            showToast("Ошибка отправки комента. Сбой сети");
-                            return null;
-                        } else
-                            return null;
+                            showToast(getString(R.string.err_send_comment_net));
+
+                        } else {
+                            showToast(getString(R.string.err_send_comment_unkn));
+                        }
+                        return new CommentId(-1);
                     })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doFinally(() -> mRefresher.setRefreshing(false))
                     .doOnSubscribe(disposable -> mRefresher.setRefreshing(true))
-                    .flatMap((Function<CommentId, SingleSource<Integer>>) commentId -> {
-                        if(commentId != null) return Single.just(commentId.getId());
-                        return  Single.just(-1);
-                    });
+                    .flatMap(commentId -> Single.just(commentId.getId()));
         }
     };
 

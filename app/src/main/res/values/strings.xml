@@ -27,4 +27,6 @@
     <string name="error_view_msg">Что-то пошло не так. Попробуйте еще раз.</string>
     <string name="menu_comments">Перейти к комментариям</string>
     <string name="comments_title">Комментарии</string>
+    <string name="err_send_comment_net">Ошибка отправки комментария. Сбой сети</string>
+    <string name="err_send_comment_unkn">Ошибка отправки комментария. Неизвестный сбой</string>
 </resources>

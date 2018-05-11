@@ -289,7 +289,7 @@ public class CommentsFragment extends Fragment {
                     .subscribeOn(Schedulers.io())
                     .onErrorReturn(throwable -> {
                         if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
-                            showToast(getString(R.string.error_load_from_server));
+                            showToast("Ошибка отправки комента. Сбой сети");
                             return null;
                         } else
                             return null;

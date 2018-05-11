@@ -75,11 +75,13 @@ public class CommentsFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        mRecyclerView = view.findViewById(R.id.recycler_comments);
         getActivity().setTitle(getString(R.string.comments_title));
+
+        mRecyclerView = view.findViewById(R.id.recycler_comments);
         mRecyclerView.setLayoutManager(new LinearLayoutManager(getActivity()));
         mCommentsAdapter = new CommentsAdapter();
         mRecyclerView.setAdapter(mCommentsAdapter);
+
         mRefresher = view.findViewById(R.id.sr_comments);
         mRefreshObservable = RxSwipeRefreshLayout.refreshes(mRefresher);
         mSendButton = view.findViewById(R.id.bt_new_comment);
@@ -121,17 +123,19 @@ public class CommentsFragment extends Fragment {
             }
         });
 
+//        mSendButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                mCommentsAdapter.addComment(new Comment("dsadsa", "from DB", "1964-12-15T00:00:00+00:00"));
+//            }
+//        });
+
         mRefreshObservable.flatMap(o -> Observable.just(0))
                 .mergeWith(Observable.just(0))
-                .flatMap(new Function() {
-                    @Override
-                    public Object apply(Object o) throws Exception {
-                        mCommentsAdapter.clearContent();
-                        return Observable.just(o);
-                    }
-                })
+                .flatMap(mCommentsAdapter.clearContent)
                 .mergeWith(mObservableClick)
                 .flatMapSingle(function)
+                .flatMap(mCommentsAdapter.addComments)
                 .subscribe(observer);
 
 
@@ -181,40 +185,23 @@ public class CommentsFragment extends Fragment {
         handler.post(() -> Toast.makeText(getActivity(), message, Toast.LENGTH_SHORT).show());
     }
 
-    Observer<Object> observer = new Observer<Object>() {
+
+    Observer<Integer> observer = new Observer<Integer>() {
         @Override
         public void onSubscribe(Disposable d) {
 
         }
 
         @Override
-        public void onNext(Object comments) {
-            try {
-
-                mCommentsAdapter.addData((List<Comment>) comments, false);
-
-//                if (comments instanceof List && !((List) comments).isEmpty() && ((List) comments).get(0) instanceof Comment) {
-//                    mCommentsAdapter.addData((List<Comment>) comments, true);
-//                }
-//
-//                if (comments instanceof Comment) {
-//                    mCommentsAdapter.addComment((Comment) comments);
-//                }
-
-            } catch (Throwable t) {
-                t.printStackTrace();
+        public void onNext(Integer integer) {
+            if (integer == 1) {
+                mRecyclerView.scrollToPosition(mCommentsAdapter.getItemCount() - 1);
             }
-//            try {
-//                mCommentsAdapter.addData(comments, true);
-//            } catch (Throwable t) {
-//                t.printStackTrace();
-//            }
-            int i = 1;
         }
 
         @Override
         public void onError(Throwable e) {
-            e.printStackTrace();
+
         }
 
         @Override
@@ -222,6 +209,47 @@ public class CommentsFragment extends Fragment {
 
         }
     };
+//    Observer<Object> observer = new Observer<Object>() {
+//        @Override
+//        public void onSubscribe(Disposable d) {
+//
+//        }
+//
+//        @Override
+//        public void onNext(Object comments) {
+//            try {
+//
+//                //  mCommentsAdapter.addData((List<Comment>) comments, false);
+//
+////                if (comments instanceof List && !((List) comments).isEmpty() && ((List) comments).get(0) instanceof Comment) {
+////                    mCommentsAdapter.addData((List<Comment>) comments, true);
+////                }
+////
+////                if (comments instanceof Comment) {
+////                    mCommentsAdapter.addComment((Comment) comments);
+////                }
+//
+//            } catch (Throwable t) {
+//                t.printStackTrace();
+//            }
+////            try {
+////                mCommentsAdapter.addData(comments, true);
+////            } catch (Throwable t) {
+////                t.printStackTrace();
+////            }
+//            int i = 1;
+//        }
+//
+//        @Override
+//        public void onError(Throwable e) {
+//            e.printStackTrace();
+//        }
+//
+//        @Override
+//        public void onComplete() {
+//
+//        }
+//};
 
     Function<Integer, Single<List<Comment>>> function = new Function<Integer, Single<List<Comment>>>() {
         @Override
@@ -254,6 +282,7 @@ public class CommentsFragment extends Fragment {
                     .doOnSubscribe(disposable -> mRefresher.setRefreshing(true));
         }
     };
+
 
 }
 

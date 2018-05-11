@@ -12,8 +12,12 @@ import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
+
 import java.util.List;
+
+
+import io.reactivex.Observable;
+import io.reactivex.functions.Function;
 
 public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
     private List<Comment> mComments = new ArrayList<>();
@@ -43,22 +47,33 @@ public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
         mComments.addAll(modifyDate(data));
 
         if(data.size() == 1) {
-            //todo разобраться с прокруткой RecycleView при добавлении нового элемента
-            notifyItemInserted(getItemCount() - 1);
+            this.notifyItemInserted(mComments.size() - 1);
         } else {
-            notifyDataSetChanged();
+            this.notifyDataSetChanged();
         }
     }
 
-    public void addComment(Comment data) throws Exception {
+    public void addComment(Comment data)  {
         mComments.add(data);
-        notifyItemInserted(getItemCount()-1);
+        notifyItemInserted(mComments.size() - 1);
     }
 
-    public void clearContent() {
+    public Observable clearContent(Object o) {
         mComments.clear();
         notifyDataSetChanged();
+        return Observable.just(o);
     }
+
+    public Function<List<Comment>, Observable<Integer>> addComments = comments -> {
+        addData(comments, false);
+        return Observable.just(comments.size());
+    };
+
+    public Function<Object, Observable<Object>> clearContent = o -> {
+        mComments.clear();
+        notifyDataSetChanged();
+        return Observable.just(o);
+    };
 
     List<Comment> modifyDate(List<Comment> comments) throws Exception{
         List<Comment> newComments = new ArrayList<>();

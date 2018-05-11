@@ -4,7 +4,9 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical">
+    android:orientation="vertical"
+    android:background="@color/colorGray"
+    android:padding="@dimen/padding">
 
     <android.support.v4.widget.SwipeRefreshLayout
         android:layout_width="wrap_content"
@@ -16,7 +18,8 @@
             android:id="@+id/recycler_comments"
             android:layout_width="match_parent"
             android:layout_height="match_parent"
-            android:visibility="visible" />
+            android:visibility="visible"
+            android:background="@color/colorGray"/>
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
@@ -24,7 +27,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="right"
-        android:orientation="horizontal">
+        android:orientation="horizontal"
+        android:layout_marginTop="@dimen/li_margin">
 
         <EditText
             android:id="@+id/et_new_comment"
@@ -32,6 +36,8 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:gravity="start"
+            android:background="@drawable/edit_text_background"
+            android:padding="@dimen/padding"
             tools:text="sample message sample message message 111 sdjfhdsk dsajklasdfjal lajdlasjdal  lajdsasljd  lasdjsaljdal " />
 
 
@@ -41,7 +47,9 @@
             android:layout_height="wrap_content"
             android:layout_gravity="bottom"
             android:src="@drawable/ic_send"
-            app:layout_constraintHorizontal_weight="1" />
+            android:background="@color/colorWhite"
+            app:layout_constraintHorizontal_weight="1"
+            android:layout_marginLeft="@dimen/li_margin"/>
     </LinearLayout>
 
 </LinearLayout>

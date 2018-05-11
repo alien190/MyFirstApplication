@@ -1,6 +1,8 @@
 package com.example.ivanovnv.myfirstapplication;
 
 import com.example.ivanovnv.myfirstapplication.comments.Comment;
+import com.example.ivanovnv.myfirstapplication.comments.CommentForPost;
+import com.example.ivanovnv.myfirstapplication.comments.CommentId;
 import com.example.ivanovnv.myfirstapplication.model.Album;
 import com.example.ivanovnv.myfirstapplication.model.Song;
 import com.example.ivanovnv.myfirstapplication.model.User;
@@ -41,4 +43,7 @@ public interface AcademyApi {
 
     @GET("comments/{id}")
     Single<Comment> getComment(@Path("id") int id);
+
+    @POST("comments")
+    Single<CommentId> postComment(@Body CommentForPost commentForPost);
 }

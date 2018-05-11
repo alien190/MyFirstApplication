@@ -10,11 +10,9 @@ import android.support.v4.app.Fragment;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.ImageButton;
 import android.widget.Toast;
 
@@ -22,20 +20,17 @@ import com.example.ivanovnv.myfirstapplication.ApiUtils;
 import com.example.ivanovnv.myfirstapplication.R;
 import com.example.ivanovnv.myfirstapplication.model.Album;
 import com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout;
+import com.jakewharton.rxbinding2.view.RxView;
 
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
-import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.Single;
-import io.reactivex.SingleObserver;
+import io.reactivex.SingleSource;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.Disposable;
-import io.reactivex.functions.Consumer;
 import io.reactivex.functions.Function;
 import io.reactivex.schedulers.Schedulers;
 
@@ -50,7 +45,7 @@ public class CommentsFragment extends Fragment {
     private SwipeRefreshLayout mRefresher;
     Observable mRefreshObservable;
     ImageButton mSendButton;
-    Observable<Integer> mObservableClick;
+    Observable mSendButtonObservable;
 
 
     public static CommentsFragment newInstance(Album album) {
@@ -85,7 +80,7 @@ public class CommentsFragment extends Fragment {
         mRefresher = view.findViewById(R.id.sr_comments);
         mRefreshObservable = RxSwipeRefreshLayout.refreshes(mRefresher);
         mSendButton = view.findViewById(R.id.bt_new_comment);
-
+        mSendButtonObservable = RxView.clicks(mSendButton);
 
 //        mRefreshObservable.flatMap(new Function() {
 //            @Override
@@ -111,17 +106,17 @@ public class CommentsFragment extends Fragment {
 //        });
 
 
-        mObservableClick = Observable.create(new ObservableOnSubscribe<Integer>() {
-            @Override
-            public void subscribe(final ObservableEmitter emitter) throws Exception {
-                mSendButton.setOnClickListener(new View.OnClickListener() {
-                    @Override
-                    public void onClick(View v) {
-                        emitter.onNext(10);
-                    }
-                });
-            }
-        });
+//        mObservableClick = Observable.create(new ObservableOnSubscribe<Integer>() {
+//            @Override
+//            public void subscribe(final ObservableEmitter emitter) throws Exception {
+//                mSendButton.setOnClickListener(new View.OnClickListener() {
+//                    @Override
+//                    public void onClick(View v) {
+//                        emitter.onNext(10);
+//                    }
+//                });
+//            }
+//        });
 
 //        mSendButton.setOnClickListener(new View.OnClickListener() {
 //            @Override
@@ -130,11 +125,12 @@ public class CommentsFragment extends Fragment {
 //            }
 //        });
 
+        //.flatMapSingle(postComment)
         mRefreshObservable.flatMap(o -> Observable.just(0))
                 .mergeWith(Observable.just(0))
                 .flatMap(mCommentsAdapter.clearContent)
-                .mergeWith(mObservableClick)
-                .flatMapSingle(function)
+                .mergeWith(mSendButtonObservable.flatMapSingle(postComment))
+                .flatMapSingle(getComment)
                 .flatMap(mCommentsAdapter.addComments)
                 .subscribe(observer);
 
@@ -251,7 +247,7 @@ public class CommentsFragment extends Fragment {
 //        }
 //};
 
-    Function<Integer, Single<List<Comment>>> function = new Function<Integer, Single<List<Comment>>>() {
+    Function<Integer, Single<List<Comment>>> getComment = new Function<Integer, Single<List<Comment>>>() {
         @Override
         public Single<List<Comment>> apply(Integer id) throws Exception {
 
@@ -283,6 +279,30 @@ public class CommentsFragment extends Fragment {
         }
     };
 
+    Function<Object, Single<Integer>> postComment = new Function<Object, Single<Integer>>() {
+        @Override
+        public Single<Integer> apply(Object o) throws Exception {
+
+            CommentForPost commentForPost = new CommentForPost(mAlbum.getId(), "bla-bla-bla");
+
+            return ApiUtils.getApi().postComment(commentForPost)
+                    .subscribeOn(Schedulers.io())
+                    .onErrorReturn(throwable -> {
+                        if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
+                            showToast(getString(R.string.error_load_from_server));
+                            return null;
+                        } else
+                            return null;
+                    })
+                    .observeOn(AndroidSchedulers.mainThread())
+                    .doFinally(() -> mRefresher.setRefreshing(false))
+                    .doOnSubscribe(disposable -> mRefresher.setRefreshing(true))
+                    .flatMap((Function<CommentId, SingleSource<Integer>>) commentId -> {
+                        if(commentId != null) return Single.just(commentId.getId());
+                        return  Single.just(-1);
+                    });
+        }
+    };
 
 }
 

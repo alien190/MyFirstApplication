@@ -28,6 +28,9 @@
             <include
                 layout="@layout/empty_comment"
                 android:visibility="gone" />
+            <include
+                layout="@layout/error_view"
+                android:visibility="gone" />
         </FrameLayout>
 
     </android.support.v4.widget.SwipeRefreshLayout>

@@ -11,6 +11,8 @@ public class ObservData {
     private List<Comment> mComments;
     private int mNewCommentCount = 0;
     private int mNewCommentId = -1;
+    private int mOldCommentCount = 0;
+
 
     public boolean isLoadCommentError() {
         return mIsLoadCommentError;
@@ -66,5 +68,13 @@ public class ObservData {
 
     public void setNewCommentId(int newCommentId) {
         this.mNewCommentId = newCommentId;
+    }
+
+    public int getOldCommentCount() {
+        return mOldCommentCount;
+    }
+
+    public void setOldCommentCount(int mOldCommentCount) {
+        this.mOldCommentCount = mOldCommentCount;
     }
 }

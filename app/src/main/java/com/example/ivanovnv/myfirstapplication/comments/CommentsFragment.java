@@ -129,6 +129,16 @@ public class CommentsFragment extends Fragment {
             mRecyclerView.setVisibility(View.VISIBLE);
 
             mRecyclerView.scrollToPosition(mCommentsAdapter.getItemCount() - 1);
+
+            if(observData.isRefreshed()) {
+                int addedComsCount = observData.getNewCommentCount() - observData.getOldCommentCount();
+                if(addedComsCount == 0) {
+                    Toast.makeText(getActivity(), R.string.no_new_comments, Toast.LENGTH_SHORT).show();
+                }
+                else {
+                    Toast.makeText(getActivity(), getString(R.string.add_new_comm) + addedComsCount, Toast.LENGTH_SHORT).show();
+                }
+            }
             // }
         }
 
@@ -147,47 +157,7 @@ public class CommentsFragment extends Fragment {
 
         }
     };
-//    Observer<Object> observer = new Observer<Object>() {
-//        @Override
-//        public void onSubscribe(Disposable d) {
-//
-//        }
-//
-//        @Override
-//        public void onNext(Object comments) {
-//            try {
-//
-//                //  mCommentsAdapter.addData((List<Comment>) comments, false);
-//
-////                if (comments instanceof List && !((List) comments).isEmpty() && ((List) comments).get(0) instanceof Comment) {
-////                    mCommentsAdapter.addData((List<Comment>) comments, true);
-////                }
-////
-////                if (comments instanceof Comment) {
-////                    mCommentsAdapter.addComment((Comment) comments);
-////                }
-//
-//            } catch (Throwable t) {
-//                t.printStackTrace();
-//            }
-////            try {
-////                mCommentsAdapter.addData(comments, true);
-////            } catch (Throwable t) {
-////                t.printStackTrace();
-////            }
-//            int i = 1;
-//        }
-//
-//        @Override
-//        public void onError(Throwable e) {
-//            e.printStackTrace();
-//        }
-//
-//        @Override
-//        public void onComplete() {
-//
-//        }
-//};
+
 
     Function<ObservData, Single<ObservData>> getComment = new Function<ObservData, Single<ObservData>>() {
         @Override
@@ -285,15 +255,3 @@ public class CommentsFragment extends Fragment {
     }
 }
 
-
-//new Consumer<List<Comment>>() {
-//@Override
-//public void accept(List<Comment> comments) throws Exception {
-//        mCommentsAdapter.addData(comments, true);
-//        }
-//        }, new Consumer<Throwable>() {
-//@Override
-//public void accept(Throwable throwable) throws Exception {
-//        throwable.printStackTrace();
-//        }
-//        }

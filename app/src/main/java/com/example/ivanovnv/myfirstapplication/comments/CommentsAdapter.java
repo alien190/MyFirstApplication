@@ -58,18 +58,15 @@ public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
         notifyItemInserted(mComments.size() - 1);
     }
 
-    public Observable clearContent(Object o) {
-        mComments.clear();
-        notifyDataSetChanged();
-        return Observable.just(o);
-    }
 
     public Function<ObservData, Observable<ObservData>> addComments = observData -> {
         addData(observData.getComments(), false);
+        observData.setNewCommentCount(mComments.size());
         return Observable.just(observData);
     };
 
     public Function<ObservData, Observable<ObservData>> clearContent = observData -> {
+        observData.setOldCommentCount(mComments.size());
         mComments.clear();
         notifyDataSetChanged();
         return Observable.just(observData);

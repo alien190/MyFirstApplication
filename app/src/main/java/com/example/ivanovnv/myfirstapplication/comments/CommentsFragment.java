@@ -187,10 +187,9 @@ public class CommentsFragment extends Fragment {
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .doFinally(() -> mRefresher.setRefreshing(false))
-                    .flatMap((Function<List<Comment>, Single<ObservData>>) comments1 -> {
-                        ObservData observData1 = new ObservData();
-                        observData1.setComments(comments1);
-                        return Single.just(observData1);
+                    .flatMap((Function<List<Comment>, Single<ObservData>>) loadedComments -> {
+                        observData.setComments(loadedComments);
+                        return Single.just(observData);
                     })
                     .doOnSubscribe(disposable -> {
                         if (!mRefresher.isRefreshing()) mRefresher.setRefreshing(true);

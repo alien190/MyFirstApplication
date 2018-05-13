@@ -58,7 +58,7 @@ public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
         notifyItemInserted(mComments.size() - 1);
     }
 
-
+    //todo сделать добавление только новых комментариев, без полной очистки списка
     public Function<ObservData, Observable<ObservData>> addComments = observData -> {
         addData(observData.getComments(), false);
         observData.setNewCommentCount(mComments.size());

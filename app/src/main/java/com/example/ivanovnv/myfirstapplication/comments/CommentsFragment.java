@@ -121,25 +121,28 @@ public class CommentsFragment extends Fragment {
 
         @Override
         public void onNext(ObservData observData) {
-            // if (integer == 1) {
+            if (observData.getNewCommentCount() != 0) {
 
+                mNoCommentLayout.setVisibility(View.GONE);
+                mErrorLayout.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.VISIBLE);
 
-            mNoCommentLayout.setVisibility(View.GONE);
-            mErrorLayout.setVisibility(View.GONE);
-            mRecyclerView.setVisibility(View.VISIBLE);
+                mRecyclerView.scrollToPosition(mCommentsAdapter.getItemCount() - 1);
 
-            mRecyclerView.scrollToPosition(mCommentsAdapter.getItemCount() - 1);
-
-            if(observData.isRefreshed()) {
-                int addedComsCount = observData.getNewCommentCount() - observData.getOldCommentCount();
-                if(addedComsCount == 0) {
-                    Toast.makeText(getActivity(), R.string.no_new_comments, Toast.LENGTH_SHORT).show();
+                if (observData.isRefreshed()) {
+                    int addedComsCount = observData.getNewCommentCount() - observData.getOldCommentCount();
+                    if (addedComsCount == 0) {
+                        Toast.makeText(getActivity(), R.string.no_new_comments, Toast.LENGTH_SHORT).show();
+                    } else {
+                        Toast.makeText(getActivity(), getString(R.string.add_new_comm) + addedComsCount, Toast.LENGTH_SHORT).show();
+                    }
                 }
-                else {
-                    Toast.makeText(getActivity(), getString(R.string.add_new_comm) + addedComsCount, Toast.LENGTH_SHORT).show();
-                }
+            } else {
+                mErrorLayout.setVisibility(View.GONE);
+                mRecyclerView.setVisibility(View.GONE);
+                mNoCommentLayout.setVisibility(View.VISIBLE);
+
             }
-            // }
         }
 
         @Override

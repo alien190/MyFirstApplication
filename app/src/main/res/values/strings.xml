@@ -22,14 +22,17 @@
     <string name="response_code_204">Успешная регистрация</string>
     <string name="response_code_400">Ошибка валидации</string>
     <string name="response_code_404">Альбома не существует</string>
-    <string name="error_load_from_server">Ошибка загрузки данных с сервера. Использована локальная БД.</string>
+    <string name="error_load_from_server_net">Ошибка загрузки данных с сервера. Сбой сети.</string>
+    <string name="error_load_from_server_unk">Ошибка загрузки данных с сервера. Неизвестный сбой.</string>
     <string name="success_load_fom_server">Данные успешно загружены с сервера</string>
     <string name="error_view_msg">Что-то пошло не так. Попробуйте еще раз.</string>
     <string name="menu_comments">Перейти к комментариям</string>
     <string name="comments_title">Комментарии</string>
     <string name="err_send_comment_net">Ошибка отправки комментария. Сбой сети</string>
-    <string name="err_send_comment_unkn">Ошибка отправки комментария. Неизвестный сбой</string>
+    <string name="err_send_comment_unk">Ошибка отправки комментария. Неизвестный сбой</string>
     <string name="no_comments">нет комментариев</string>
     <string name="no_new_comments">Новых комментариев нет</string>
     <string name="add_new_comm">Комментарии обновлены. Добавлено:</string>
+    <string name="no_text_for_send">Нет текста для отправки</string>
+    <string name="error_load_from_server_use_db">Ошибка загрузки данных с сервера. Использована локальная БД.</string>
 </resources>

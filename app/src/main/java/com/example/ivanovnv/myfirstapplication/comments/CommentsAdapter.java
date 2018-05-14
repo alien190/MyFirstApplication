@@ -20,7 +20,7 @@ import io.reactivex.Observable;
 import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
-public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
+public class CommentsAdapter extends RecyclerView.Adapter<CommentHolder> {
     private List<Comment> mComments = new ArrayList<>();
 
     @NonNull
@@ -41,52 +41,38 @@ public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
         return mComments.size();
     }
 
-    public void addData(List<Comment> data, boolean isRefreshed) throws Exception {
-        if (isRefreshed) {
-            mComments.clear();
+
+    public Function<MessageData, Observable<MessageData>> updateComments = messageData -> {
+        messageData.setNewLoadedCommentCount(0);
+        int lastCommentPosition = mComments.size() - 1;
+
+
+        for (Comment comment : modifyDate(messageData.getComments())) {
+            if (mComments.indexOf(comment) == -1) {
+                mComments.add(comment);
+                messageData.setNewLoadedCommentCount(messageData.getNewLoadedCommentCount() + 1);
+            }
         }
-        mComments.addAll(modifyDate(data));
+        if (messageData.getNewLoadedCommentCount() != 0)
+            notifyItemRangeInserted(lastCommentPosition + 1, messageData.getNewLoadedCommentCount());
 
-        if(data.size() == 1) {
-            this.notifyItemInserted(mComments.size() - 1);
-        } else {
-            this.notifyDataSetChanged();
-        }
-    }
-
-    public void addComment(Comment data)  {
-        mComments.add(data);
-        notifyItemInserted(mComments.size() - 1);
-    }
-
-    //todo сделать добавление только новых комментариев, без полной очистки списка
-    public Function<MessageData, Observable<MessageData>> addComments = messageData -> {
-        addData(messageData.getComments(), false);
-        messageData.setNewCommentCount(mComments.size());
         return Observable.just(messageData);
     };
 
-    public Function<MessageData, ObservableSource<MessageData>> clearContent = messageData -> {
-        messageData.setOldCommentCount(mComments.size());
-        mComments.clear();
-        notifyDataSetChanged();
-        return Observable.just(messageData);
-    };
 
-    List<Comment> modifyDate(List<Comment> comments) throws Exception{
+    List<Comment> modifyDate(List<Comment> comments) throws Exception {
         List<Comment> newComments = new ArrayList<>();
-        for (Comment comment:comments) {
+        for (Comment comment : comments) {
             DateFormat dfParse = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssz");
             Calendar date = Calendar.getInstance();
             date.setTime(dfParse.parse(comment.getTimestamp()));
             DateFormat dfOut;
 
-             if(Calendar.getInstance().getTimeInMillis() - date.getTimeInMillis() > 86400000) {
-                 dfOut = new SimpleDateFormat("dd.MM.yyyy");
-             }
-             else {
-                 dfOut = new SimpleDateFormat("HH:mm:ss");
-             }
+            if (Calendar.getInstance().getTimeInMillis() - date.getTimeInMillis() > 86400000) {
+                dfOut = new SimpleDateFormat("dd.MM.yyyy");
+            } else {
+                dfOut = new SimpleDateFormat("HH:mm:ss");
+            }
 
             comment.setTimestamp(dfOut.format(date.getTime()));
             newComments.add(comment);

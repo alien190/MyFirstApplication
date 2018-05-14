@@ -62,4 +62,9 @@ public class Comment {
         this.mAuthor = mAuthor;
         this.mTimestamp = mTimestamp;
     }
+
+    @Override
+    public boolean equals(Object comment) {
+        return comment != null && ((Comment)comment).mId == this.mId;
+    }
 }

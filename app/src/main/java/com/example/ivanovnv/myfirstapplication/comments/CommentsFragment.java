@@ -9,9 +9,12 @@ import android.support.v4.app.Fragment;;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.util.Log;
+import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.EditText;
 import android.widget.ImageButton;
 import android.widget.LinearLayout;
 import android.widget.Toast;
@@ -25,7 +28,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import io.reactivex.Observable;
-import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.Single;
@@ -45,11 +47,15 @@ public class CommentsFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private Album mAlbum;
     private SwipeRefreshLayout mRefresher;
-    private Observable<MessageData> mRefreshObservable;
     private ImageButton mSendButton;
-    private Observable<MessageData> mSendButtonObservable;
     private LinearLayout mErrorLayout;
     private LinearLayout mNoCommentLayout;
+    private EditText mNewCommentEditText;
+
+    private Observable<MessageData> mSendButtonObservable;
+    private Observable<MessageData> mRefreshObservable;
+    private Observable<MessageData> mEditorActionObservable;
+    private Observable<MessageData> mKeyObservable;
 
 
     public static CommentsFragment newInstance(Album album) {
@@ -81,11 +87,10 @@ public class CommentsFragment extends Fragment {
         mRecyclerView.setAdapter(mCommentsAdapter);
 
         mRefresher = view.findViewById(R.id.sr_comments);
-
         mSendButton = view.findViewById(R.id.bt_new_comment);
-
         mErrorLayout = view.findViewById(R.id.errorView);
         mNoCommentLayout = view.findViewById(R.id.no_comment_view);
+        mNewCommentEditText = view.findViewById(R.id.et_new_comment);
 
         mAlbum = (Album) getArguments().getSerializable(ALBUM_KEY);
 
@@ -110,27 +115,24 @@ public class CommentsFragment extends Fragment {
 
         @Override
         public void onNext(MessageData messageData) {
-            if (messageData.getNewCommentCount() != 0) {
 
+            if (messageData.isRefreshed()) {
+                if (messageData.getNewLoadedCommentCount() == 0) {
+                    Toast.makeText(getActivity(), R.string.no_new_comments, Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getActivity(), getString(R.string.add_new_comm) + messageData.getNewLoadedCommentCount(), Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            if (messageData.getComments().size() != 0) {
                 mNoCommentLayout.setVisibility(View.GONE);
                 mErrorLayout.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.VISIBLE);
-
                 mRecyclerView.scrollToPosition(mCommentsAdapter.getItemCount() - 1);
-
-                if (messageData.isRefreshed()) {
-                    int addedComsCount = messageData.getNewCommentCount() - messageData.getOldCommentCount();
-                    if (addedComsCount == 0) {
-                        Toast.makeText(getActivity(), R.string.no_new_comments, Toast.LENGTH_SHORT).show();
-                    } else {
-                        Toast.makeText(getActivity(), getString(R.string.add_new_comm) + addedComsCount, Toast.LENGTH_SHORT).show();
-                    }
-                }
             } else {
                 mErrorLayout.setVisibility(View.GONE);
                 mRecyclerView.setVisibility(View.GONE);
                 mNoCommentLayout.setVisibility(View.VISIBLE);
-
             }
         }
 
@@ -164,36 +166,62 @@ public class CommentsFragment extends Fragment {
             emitter.onNext(messageData);
         }));
 
+        mNewCommentEditText.setImeActionLabel("Send", KeyEvent.KEYCODE_ENTER);
 
-        mSendButtonObservable = Observable.create((ObservableOnSubscribe<MessageData>) emitter -> mSendButton.setOnClickListener(v -> {
-            MessageData messageData = new MessageData();
-            messageData.setIsRefreshed();
-            emitter.onNext(messageData);
-        })).flatMapSingle(postComment);
+        mSendButtonObservable = Observable.create((ObservableOnSubscribe<MessageData>) emitter ->
+                mSendButton.setOnClickListener(v -> {
+                            MessageData messageData = createNewCommentToPost();
+                            if (messageData != null) emitter.onNext(messageData);
+                        }
+                )).flatMapSingle(postComment);
+
+        mEditorActionObservable = Observable.create((ObservableOnSubscribe<MessageData>) emitter ->
+                mNewCommentEditText.setOnEditorActionListener((v, actionId, event) -> {
+                    if (actionId == KeyEvent.KEYCODE_ENTER) {
+                        MessageData messageData = createNewCommentToPost();
+                        if (messageData != null) emitter.onNext(messageData);
+                        return true;
+                    }
+                    return false;
+                })).flatMapSingle(postComment);
+
+        mKeyObservable = Observable.create((ObservableOnSubscribe<MessageData>) emitter ->
+                mNewCommentEditText.setOnKeyListener((v, keyCode, event) -> {
+                    if (event.getAction() == KeyEvent.ACTION_DOWN &&
+                            (keyCode == KeyEvent.KEYCODE_ENTER ||
+                                    keyCode == KeyEvent.KEYCODE_NUMPAD_ENTER)) {
+                        MessageData messageData = createNewCommentToPost();
+                        if (messageData != null) emitter.onNext(messageData);
+                        return true;
+                    }
+                    return false;
+                })).flatMapSingle(postComment);
 
 
         Predicate<MessageData> filterMessage = messageData -> {
             if (messageData.isRefreshed()) return true;
             if (messageData.isFirstLoad()) return true;
             if (messageData.isAddComment()) {
-                if (messageData.getNewCommentId() == -1) mRefresher.setRefreshing(false);
-                return messageData.getNewCommentId() != -1;
+                if (messageData.getAddedCommentId() == -1) mRefresher.setRefreshing(false);
+                return messageData.getAddedCommentId() != -1;
             }
             return false;
         };
 
         mRefreshObservable
                 .mergeWith(FirstLoadObservable)
-                .flatMap(mCommentsAdapter.clearContent)
                 .mergeWith(mSendButtonObservable)
+                .mergeWith(mEditorActionObservable)
+                .mergeWith(mKeyObservable)
                 .filter(filterMessage)
-                .flatMapSingle(getComment)
-                .flatMap(mCommentsAdapter.addComments)
+                .flatMapSingle(getComments)
+                .flatMap(mCommentsAdapter.updateComments)
+                .observeOn(AndroidSchedulers.mainThread())
                 .subscribe(observer);
     }
 
 
-    Function<MessageData, Single<MessageData>> getComment = new Function<MessageData, Single<MessageData>>() {
+    Function<MessageData, Single<MessageData>> getComments = new Function<MessageData, Single<MessageData>>() {
         @Override
         public Single<MessageData> apply(MessageData messageData) throws Exception {
 
@@ -202,31 +230,31 @@ public class CommentsFragment extends Fragment {
             if (messageData.isRefreshed() || messageData.isFirstLoad()) {
                 comments = ApiUtils.getApi().getAlbumComments(mAlbum.getId());
             } else {
-                comments = ApiUtils.getApi().getComment(messageData.getNewCommentId()).map(comment -> new ArrayList<Comment>() {{
+                comments = ApiUtils.getApi().getComment(messageData.getAddedCommentId()).map(comment -> new ArrayList<Comment>() {{
                     add(comment);
                 }});
             }
 
             return comments
                     .subscribeOn(Schedulers.io())
-                    .onErrorReturn(throwable -> {
-                        if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
-                            showToast(getString(R.string.error_load_from_server));
-
-                            return new ArrayList<Comment>() {{
-                                add(new Comment("dsadsa", "from DB", "1964-12-15T00:00:00+00:00"));
-                            }};
-                        } else
-                            return null;
-                    })
                     .observeOn(AndroidSchedulers.mainThread())
-                    .doFinally(() -> mRefresher.setRefreshing(false))
-                    .flatMap((Function<List<Comment>, Single<MessageData>>) loadedComments -> {
-                        messageData.setComments(loadedComments);
-                        return Single.just(messageData);
+                    .doOnError(throwable -> Log.d(TAG, "getComments.doOnError thread id: " + Thread.currentThread().getId()))
+                    .onErrorReturn(throwable -> {
+                        Log.d(TAG, "getComments.onErrorReturn thread id: " + Thread.currentThread().getId());
+                        if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
+                            showToast(getString(R.string.error_load_from_server_net));
+                        } else
+                            showToast(getString(R.string.error_load_from_server_unk));
+                        return null;
                     })
                     .doOnSubscribe(disposable -> {
                         if (!mRefresher.isRefreshing()) mRefresher.setRefreshing(true);
+                    })
+                    .doFinally(() -> mRefresher.setRefreshing(false))
+                    .flatMap((Function<List<Comment>, Single<MessageData>>) loadedComments -> {
+                        Log.d(TAG, "getComments.flatmap thread id: " + Thread.currentThread().getId());
+                        messageData.setComments(loadedComments);
+                        return Single.just(messageData);
                     });
         }
     };
@@ -235,30 +263,44 @@ public class CommentsFragment extends Fragment {
         @Override
         public SingleSource<MessageData> apply(MessageData messageData) throws Exception {
 
-            CommentForPost commentForPost = new CommentForPost(mAlbum.getId(), "bla-bla-bla");
-
-            return ApiUtils.getApi().postComment(commentForPost)
+            return ApiUtils.getApi().postComment(messageData.getNewCommentForPost())
                     .subscribeOn(Schedulers.io())
+                    .observeOn(AndroidSchedulers.mainThread())
                     .onErrorReturn(throwable -> {
+                        Log.d(TAG, "postComment.onErrorReturn thread id: " + Thread.currentThread().getId());
                         if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
                             showToast(getString(R.string.err_send_comment_net));
 
                         } else {
-                            showToast(getString(R.string.err_send_comment_unkn));
+                            showToast(getString(R.string.err_send_comment_unk));
                         }
                         return new CommentId(-1);
                     })
-                    .observeOn(AndroidSchedulers.mainThread())
-                    .doOnSubscribe(disposable -> mRefresher.setRefreshing(true))
                     .flatMap((Function<CommentId, SingleSource<MessageData>>) commentId -> {
                         messageData.setIsAddComment();
-                        messageData.setNewCommentId(commentId.getId());
+                        messageData.setAddedCommentId(commentId.getId());
+                        if (commentId.getId() != -1) {
+                            mNewCommentEditText.setText("");
+                        }
+                        Log.d(TAG, "postComment.flatmap thread id: " + Thread.currentThread().getId());
                         return Single.just(messageData);
-                    });
+                    })
+                    .doOnSubscribe(disposable -> mRefresher.setRefreshing(true));
+
         }
     };
 
+    private MessageData createNewCommentToPost() {
+        if (!mNewCommentEditText.getText().toString().isEmpty()) {
+            MessageData messageData = new MessageData();
+            messageData.setIsAddComment();
+            messageData.setNewCommentForPost(new CommentForPost(mAlbum.getId(), mNewCommentEditText.getText().toString()));
+            return messageData;
+        } else {
+            Toast.makeText(getActivity(), getString(R.string.no_text_for_send), Toast.LENGTH_SHORT).show();
+            return null;
+        }
 
-
+    }
 }
 

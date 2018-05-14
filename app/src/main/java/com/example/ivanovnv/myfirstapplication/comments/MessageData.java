@@ -9,10 +9,18 @@ public class MessageData {
     private boolean mIsLoadCommentError = false;
 
     private List<Comment> mComments;
-    private int mNewCommentCount = 0;
-    private int mNewCommentId = -1;
-    private int mOldCommentCount = 0;
+    private int mNewLoadedCommentCount = 0;
+    private int mAddedCommentId = -1;
 
+    private CommentForPost mNewCommentForPost;
+
+    public CommentForPost getNewCommentForPost() {
+        return mNewCommentForPost;
+    }
+
+    public void setNewCommentForPost(CommentForPost mNewCommentForPost) {
+        this.mNewCommentForPost = mNewCommentForPost;
+    }
 
     public boolean isLoadCommentError() {
         return mIsLoadCommentError;
@@ -54,27 +62,20 @@ public class MessageData {
         this.mComments = comments;
     }
 
-    public int getNewCommentCount() {
-        return mNewCommentCount;
+    public int getNewLoadedCommentCount() {
+        return mNewLoadedCommentCount;
     }
 
-    public void setNewCommentCount(int mNewCommentCount) {
-        this.mNewCommentCount = mNewCommentCount;
+    public void setNewLoadedCommentCount(int mNewCommentCount) {
+        this.mNewLoadedCommentCount = mNewCommentCount;
     }
 
-    public int getNewCommentId() {
-        return mNewCommentId;
+    public int getAddedCommentId() {
+        return mAddedCommentId;
     }
 
-    public void setNewCommentId(int newCommentId) {
-        this.mNewCommentId = newCommentId;
+    public void setAddedCommentId(int newCommentId) {
+        this.mAddedCommentId = newCommentId;
     }
 
-    public int getOldCommentCount() {
-        return mOldCommentCount;
-    }
-
-    public void setOldCommentCount(int mOldCommentCount) {
-        this.mOldCommentCount = mOldCommentCount;
-    }
 }

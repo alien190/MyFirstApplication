@@ -93,7 +93,7 @@ public class AlbumsFragment extends Fragment implements SwipeRefreshLayout.OnRef
                 })
                 .onErrorReturn(throwable -> {
                     if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
-                        showToast(getString(R.string.error_load_from_server));
+                        showToast(getString(R.string.error_load_from_server_use_db));
                         return getMusicDao().getAlbums();
                         //return getMusicDao().getAlbumsByIds(new ArrayList<Integer>(){{add(2); add(3);}});
                     } else

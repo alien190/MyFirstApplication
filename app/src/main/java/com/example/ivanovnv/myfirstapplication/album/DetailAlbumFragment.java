@@ -116,7 +116,7 @@ public class DetailAlbumFragment extends Fragment implements SwipeRefreshLayout.
                 })
                 .onErrorReturn(throwable -> {
                     if (ApiUtils.NETWORK_EXCEPTIONS.contains(throwable.getClass())) {
-                        showToast(getString(R.string.error_load_from_server));
+                        showToast(getString(R.string.error_load_from_server_use_db));
                         Album retAlbum = new Album();
                         retAlbum.setSongs(getMusicDao().getSongsByAlbumId(mAlbum.getId()));
                         return retAlbum;

@@ -1,6 +1,5 @@
 package com.example.ivanovnv.myfirstapplication.comments;
 
-import android.annotation.SuppressLint;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,7 +9,6 @@ import android.support.v4.app.Fragment;;
 import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +19,6 @@ import android.widget.Toast;
 import com.example.ivanovnv.myfirstapplication.ApiUtils;
 import com.example.ivanovnv.myfirstapplication.R;
 import com.example.ivanovnv.myfirstapplication.model.Album;
-import com.jakewharton.rxbinding2.support.v4.widget.RxSwipeRefreshLayout;
-import com.jakewharton.rxbinding2.view.RxView;
 
 
 import java.util.ArrayList;
@@ -31,7 +27,6 @@ import java.util.List;
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
-import io.reactivex.ObservableSource;
 import io.reactivex.Observer;
 import io.reactivex.Single;
 import io.reactivex.SingleSource;
@@ -50,9 +45,9 @@ public class CommentsFragment extends Fragment {
     private RecyclerView mRecyclerView;
     private Album mAlbum;
     private SwipeRefreshLayout mRefresher;
-    private Observable mRefreshObservable;
+    private Observable<MessageData> mRefreshObservable;
     private ImageButton mSendButton;
-    private Observable mSendButtonObservable;
+    private Observable<MessageData> mSendButtonObservable;
     private LinearLayout mErrorLayout;
     private LinearLayout mNoCommentLayout;
 
@@ -88,14 +83,11 @@ public class CommentsFragment extends Fragment {
         mRefresher = view.findViewById(R.id.sr_comments);
 
         mSendButton = view.findViewById(R.id.bt_new_comment);
-        mSendButtonObservable = RxView.clicks(mSendButton);
 
         mErrorLayout = view.findViewById(R.id.errorView);
         mNoCommentLayout = view.findViewById(R.id.no_comment_view);
 
         mAlbum = (Album) getArguments().getSerializable(ALBUM_KEY);
-
-        mRefreshObservable = RxSwipeRefreshLayout.refreshes(mRefresher);
 
         createNewObservers(true);
     }
@@ -103,8 +95,6 @@ public class CommentsFragment extends Fragment {
     @Override
     public void onActivityCreated(@Nullable Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
-
-
     }
 
     private void showToast(final String message) {
@@ -113,15 +103,14 @@ public class CommentsFragment extends Fragment {
     }
 
 
-    Observer<ObservData> observer = new Observer<ObservData>() {
+    Observer<MessageData> observer = new Observer<MessageData>() {
         @Override
         public void onSubscribe(Disposable d) {
-
         }
 
         @Override
-        public void onNext(ObservData observData) {
-            if (observData.getNewCommentCount() != 0) {
+        public void onNext(MessageData messageData) {
+            if (messageData.getNewCommentCount() != 0) {
 
                 mNoCommentLayout.setVisibility(View.GONE);
                 mErrorLayout.setVisibility(View.GONE);
@@ -129,8 +118,8 @@ public class CommentsFragment extends Fragment {
 
                 mRecyclerView.scrollToPosition(mCommentsAdapter.getItemCount() - 1);
 
-                if (observData.isRefreshed()) {
-                    int addedComsCount = observData.getNewCommentCount() - observData.getOldCommentCount();
+                if (messageData.isRefreshed()) {
+                    int addedComsCount = messageData.getNewCommentCount() - messageData.getOldCommentCount();
                     if (addedComsCount == 0) {
                         Toast.makeText(getActivity(), R.string.no_new_comments, Toast.LENGTH_SHORT).show();
                     } else {
@@ -162,16 +151,58 @@ public class CommentsFragment extends Fragment {
     };
 
 
-    Function<ObservData, Single<ObservData>> getComment = new Function<ObservData, Single<ObservData>>() {
+    private void createNewObservers(boolean firstTime) {
+
+        MessageData messageDataFirstLoad = new MessageData();
+        if (firstTime) messageDataFirstLoad.setIsFirstLoad();
+        Observable<MessageData> FirstLoadObservable = Observable.just(messageDataFirstLoad);
+
+
+        mRefreshObservable = Observable.create(emitter -> mRefresher.setOnRefreshListener(() -> {
+            MessageData messageData = new MessageData();
+            messageData.setIsRefreshed();
+            emitter.onNext(messageData);
+        }));
+
+
+        mSendButtonObservable = Observable.create((ObservableOnSubscribe<MessageData>) emitter -> mSendButton.setOnClickListener(v -> {
+            MessageData messageData = new MessageData();
+            messageData.setIsRefreshed();
+            emitter.onNext(messageData);
+        })).flatMapSingle(postComment);
+
+
+        Predicate<MessageData> filterMessage = messageData -> {
+            if (messageData.isRefreshed()) return true;
+            if (messageData.isFirstLoad()) return true;
+            if (messageData.isAddComment()) {
+                if (messageData.getNewCommentId() == -1) mRefresher.setRefreshing(false);
+                return messageData.getNewCommentId() != -1;
+            }
+            return false;
+        };
+
+        mRefreshObservable
+                .mergeWith(FirstLoadObservable)
+                .flatMap(mCommentsAdapter.clearContent)
+                .mergeWith(mSendButtonObservable)
+                .filter(filterMessage)
+                .flatMapSingle(getComment)
+                .flatMap(mCommentsAdapter.addComments)
+                .subscribe(observer);
+    }
+
+
+    Function<MessageData, Single<MessageData>> getComment = new Function<MessageData, Single<MessageData>>() {
         @Override
-        public Single<ObservData> apply(ObservData observData) throws Exception {
+        public Single<MessageData> apply(MessageData messageData) throws Exception {
 
             Single<List<Comment>> comments;
 
-            if (observData.isRefreshed() || observData.isFirstLoad()) {
+            if (messageData.isRefreshed() || messageData.isFirstLoad()) {
                 comments = ApiUtils.getApi().getAlbumComments(mAlbum.getId());
             } else {
-                comments = ApiUtils.getApi().getComment(observData.getNewCommentId()).map(comment -> new ArrayList<Comment>() {{
+                comments = ApiUtils.getApi().getComment(messageData.getNewCommentId()).map(comment -> new ArrayList<Comment>() {{
                     add(comment);
                 }});
             }
@@ -190,9 +221,9 @@ public class CommentsFragment extends Fragment {
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .doFinally(() -> mRefresher.setRefreshing(false))
-                    .flatMap((Function<List<Comment>, Single<ObservData>>) loadedComments -> {
-                        observData.setComments(loadedComments);
-                        return Single.just(observData);
+                    .flatMap((Function<List<Comment>, Single<MessageData>>) loadedComments -> {
+                        messageData.setComments(loadedComments);
+                        return Single.just(messageData);
                     })
                     .doOnSubscribe(disposable -> {
                         if (!mRefresher.isRefreshing()) mRefresher.setRefreshing(true);
@@ -200,9 +231,9 @@ public class CommentsFragment extends Fragment {
         }
     };
 
-    Function<Object, Single<ObservData>> postComment = new Function<Object, Single<ObservData>>() {
+    Function<MessageData, SingleSource<MessageData>> postComment = new Function<MessageData, SingleSource<MessageData>>() {
         @Override
-        public Single<ObservData> apply(Object o) throws Exception {
+        public SingleSource<MessageData> apply(MessageData messageData) throws Exception {
 
             CommentForPost commentForPost = new CommentForPost(mAlbum.getId(), "bla-bla-bla");
 
@@ -219,41 +250,15 @@ public class CommentsFragment extends Fragment {
                     })
                     .observeOn(AndroidSchedulers.mainThread())
                     .doOnSubscribe(disposable -> mRefresher.setRefreshing(true))
-                    .flatMap((Function<CommentId, SingleSource<ObservData>>) commentId -> {
-                        ObservData observData = new ObservData();
-                        observData.setIsAddComment();
-                        observData.setNewCommentId(commentId.getId());
-                        return Single.just(observData);
+                    .flatMap((Function<CommentId, SingleSource<MessageData>>) commentId -> {
+                        messageData.setIsAddComment();
+                        messageData.setNewCommentId(commentId.getId());
+                        return Single.just(messageData);
                     });
         }
     };
 
 
-    private void createNewObservers(boolean firstTime) {
 
-        ObservData observDataFirstLoad = new ObservData();
-        if (firstTime) observDataFirstLoad.setIsFirstLoad();
-
-        mRefreshObservable.flatMap((Function<Object, Observable<ObservData>>) o -> {
-            ObservData observData = new ObservData();
-            observData.setIsRefreshed();
-            return Observable.just(observData);
-        })
-                .mergeWith(Observable.just(observDataFirstLoad))
-                .flatMap(mCommentsAdapter.clearContent)
-                .mergeWith(mSendButtonObservable.flatMapSingle(postComment))
-                .filter((Predicate<ObservData>) observData -> {
-                    if (observData.isRefreshed()) return true;
-                    if (observData.isFirstLoad()) return true;
-                    if (observData.isAddComment()) {
-                        if (observData.getNewCommentId() == -1) mRefresher.setRefreshing(false);
-                        return observData.getNewCommentId() != -1;
-                    }
-                    return false;
-                })
-                .flatMapSingle(getComment)
-                .flatMap(mCommentsAdapter.addComments)
-                .subscribe(observer);
-    }
 }
 

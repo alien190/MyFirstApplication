@@ -17,6 +17,7 @@ import java.util.List;
 
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableSource;
 import io.reactivex.functions.Function;
 
 public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
@@ -59,17 +60,17 @@ public class CommentsAdapter extends RecyclerView.Adapter <CommentHolder> {
     }
 
     //todo сделать добавление только новых комментариев, без полной очистки списка
-    public Function<ObservData, Observable<ObservData>> addComments = observData -> {
-        addData(observData.getComments(), false);
-        observData.setNewCommentCount(mComments.size());
-        return Observable.just(observData);
+    public Function<MessageData, Observable<MessageData>> addComments = messageData -> {
+        addData(messageData.getComments(), false);
+        messageData.setNewCommentCount(mComments.size());
+        return Observable.just(messageData);
     };
 
-    public Function<ObservData, Observable<ObservData>> clearContent = observData -> {
-        observData.setOldCommentCount(mComments.size());
+    public Function<MessageData, ObservableSource<MessageData>> clearContent = messageData -> {
+        messageData.setOldCommentCount(mComments.size());
         mComments.clear();
         notifyDataSetChanged();
-        return Observable.just(observData);
+        return Observable.just(messageData);
     };
 
     List<Comment> modifyDate(List<Comment> comments) throws Exception{

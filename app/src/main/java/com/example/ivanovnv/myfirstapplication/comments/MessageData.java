@@ -2,7 +2,7 @@ package com.example.ivanovnv.myfirstapplication.comments;
 
 import java.util.List;
 
-public class ObservData {
+public class MessageData {
     private boolean mIsFirstLoad = false;
     private boolean mIsRefreshed = false;
     private boolean mIsAddComment = false;
